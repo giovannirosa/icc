@@ -25,7 +25,7 @@ int bisseccao (Polinomio p, double a, double b, double *eps,
     else b = xn;
     xnp = (a + b) / 2;
     *eps = fabs((xnp - xn) / xnp);
-    printf("Tentativa %d, xnp = %lf, absx = %lf\n", *it, xnp, *eps);
+    // printf("Tentativa %d, xnp = %lf, absx = %lf\n", *it, xnp, *eps);
   } while(*eps > EPS);
   *raiz = xnp;
   return 0;
@@ -45,7 +45,7 @@ int newtonRaphson (Polinomio p, double x0, double *eps,
   }
   x = x0 - (*fx0 / *dfx0);
   *eps = fabs((x - x0) / x);
-  printf("Tentativa %d, x = %lf, absx = %lf\n", *it, x, *eps);
+  // printf("Tentativa %d, x = %lf, absx = %lf\n", *it, x, *eps);
   while (*eps > EPS && *it < MAXIT) {
     *it = *it + 1;
     x0 = x;
@@ -56,7 +56,7 @@ int newtonRaphson (Polinomio p, double x0, double *eps,
     }
     x = x0 - (*fx0 / *dfx0);
     *eps = fabs((x - x0) / x);
-    printf("Tentativa %d, x = %lf, absx = %lf\n", *it, x, *eps);
+    // printf("Tentativa %d, x = %lf, absx = %lf\n", *it, x, *eps);
   }
   *raiz = x;
   if (*it > MAXIT) return -1;
@@ -81,7 +81,7 @@ int secante (Polinomio p, double x0, double x1, double *eps,
   }
   x = x1 - (*fx1 * (x1 - x0)) / (*dfx1 - *dfx0);
   *eps = fabs((x - x1) / x);
-  printf("Tentativa %d, x = %lf, absx = %lf\n", *it, x, *eps);
+  // printf("Tentativa %d, x = %lf, absx = %lf\n", *it, x, *eps);
   while (*eps > EPS && *it < MAXIT) {
     *it = *it + 1;
     x0 = x1;
@@ -95,7 +95,7 @@ int secante (Polinomio p, double x0, double x1, double *eps,
     }
     x = x1 - (*fx1 * (x1 - x0)) / (*dfx1 - *dfx0);
     *eps = fabs((x - x1) / x);
-    printf("Tentativa %d, x = %lf, absx = %lf\n", *it, x, *eps);
+    // printf("Tentativa %d, x = %lf, absx = %lf\n", *it, x, *eps);
   }
   *raiz = x;
   if (*it > MAXIT) return -1;
@@ -105,16 +105,16 @@ int secante (Polinomio p, double x0, double x1, double *eps,
 
 void calcPolinomio_rapido(Polinomio p, double x, double *px, double *dpx) {
   double b = p.p[p.grau];
-  printf("\nb = %lf\n", b);
+  // printf("\nb = %lf\n", b);
   double c = b;
   for (int k = p.grau - 1; k; --k) {
-    b = b + (p.p[k] * x);
-    printf("\nb = %lf + (%lf * %lf) = %lf\n", c, p.p[k], x, b);
-    c = c + (b * x);
-    printf("\nc = %lf + (%lf * %lf) = %lf\n", c, b, x, c);
+    b = p.p[k] + (b * x);
+    // printf("\nb = %lf + (%lf * %lf) = %lf\n", c, p.p[k], x, b);
+    c = b + (c * x);
+    // printf("\nc = %lf + (%lf * %lf) = %lf\n", c, b, x, c);
   }
-  b = b + (p.p[0] * x);
-  printf("\nb = %lf + (%lf * %lf) = %lf\n", c, p.p[0], x, b);
+  b = p.p[0] + (b * x);
+  // printf("\nb = %lf + (%lf * %lf) = %lf\n", c, p.p[0], x, b);
   *px = b;
   if (dpx != NULL) *dpx = c;
 }
@@ -131,12 +131,12 @@ void calcPolinomio_lento(Polinomio p, double x, double *px, double *dpx) {
     if (i < p.grau) {
       derivAnt = deriv;
       double powerDeriv = pow(x,p.grau-i-1);
-      printf("\npowerDeriv = %lf ^ %d = %lf\n", x, p.grau-i-1,powerDeriv);
+      // printf("\npowerDeriv = %lf ^ %d = %lf\n", x, p.grau-i-1,powerDeriv);
       // if (powerDeriv > 1)
         deriv = deriv + ((p.p[i] * p.grau-i) * powerDeriv);
       // else
       //   deriv = deriv + ((p.p[i] * p.grau-i));
-      printf("\nderiv = %lf + (%lf * %d) * %lf = %lf\n", derivAnt, p.p[i], p.grau-i, powerDeriv, deriv);
+      // printf("\nderiv = %lf + (%lf * %d) * %lf = %lf\n", derivAnt, p.p[i], p.grau-i, powerDeriv, deriv);
     }
   }
   *px = result;
