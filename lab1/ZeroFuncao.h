@@ -14,9 +14,9 @@ typedef struct {
 } Polinomio;
 
 // Métodos
-double bisseccao (Polinomio p, double a, double b, double eps, int *it, double *raiz);
-double newtonRaphson (Polinomio p, double x0, double eps, int *it, double *raiz);
-double secante (Polinomio p, double x0, double x1, double eps, int *it, double *raiz);
+int bisseccao (Polinomio p, double a, double b, double *eps, int *it, double *raiz, int rapido);
+int newtonRaphson (Polinomio p, double x0, double *eps, int *it, double *raiz, int rapido);
+int secante (Polinomio p, double x0, double x1, double *eps, int *it, double *raiz, int rapido);
 
 // Cálculo de Polinômios
 void calcPolinomio_rapido(Polinomio p, double x, double *px, double *dpx );
