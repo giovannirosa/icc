@@ -13,5 +13,11 @@ double  jacobi (double  *A, double *B,  double *X,  int n,
 double  gaussSeidel (double  *A, double *B,  double *X,  int n,
 		     double *tIteracao, double *tTotal);
 
+double somatorio(double *A, double *X, int n, int i);
+
+double norma(double *X, double *Y, int n);
+
+double sassenfeld(double *A, int n);
+
 #endif // __SISLINEAR_H__
 
