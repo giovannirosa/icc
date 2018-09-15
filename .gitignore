@@ -1,2 +1,4 @@
 *.o
 labZero
+*.tar
+cgSolver

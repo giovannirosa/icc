@@ -4,6 +4,7 @@
         "cmath": "c",
         "zerofuncao.h": "c",
         "utils.h": "c",
-        "sistemaslineares.h": "c"
+        "sistemaslineares.h": "c",
+        "string.h": "c"
     }
 }
