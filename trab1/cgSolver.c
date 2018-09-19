@@ -51,7 +51,20 @@ int main(int argc, char *argv[]) {
     char *out = NULL;
     FILE *fp;
     printf("Lendo parâmetros...\n");
-    for(int cont=0; cont < argc; cont++) {
+    for(int cont=1; cont < argc; cont++) {
+        if (strcmp(argv[cont],"-h") == 0) {
+            printf("O programa deve ser executado com os seguintes parâmetros:\n");
+            printf("cgSolver -n <n> -k <k> -p <ω> -i <i> -e <ε> -o <arquivo_saida>\n");
+            printf("<n>: (n>10) parâmetro obrigatório definindo a dimensão do Sistema Linear.\n");
+            printf("<k>: (k>1 e k ímpar)  parâmetro obrigatório definindo o número de diagonais da matriz A.\n");
+            printf("<ω>: parâmetro obrigatório indicando o pré-condicionador a ser utilizado:\n");
+            printf("\tω=0.0: sem pré-condicionador\n");
+            printf("\t0.0 < ω < 1.0: pré-condicionador de Jacobi\n");
+            printf("<i>: parâmetro obrigatório definindo o número máximo de iterações a serem executadas.\n");
+            printf("<ε>: parâmetro opcional definindo o erro aproximado absoluto máximo, considerando a norma max (relativa) em x (max|xi - xi-1| * 1/|xi| < ε).\n");
+            printf("<arquivo_saida>: parâmetro obrigatório no qual arquivo_saida é o caminho completo para o arquivo que vai conter a solução.\n");
+            return 0;
+        }
         if (strcmp(argv[cont],"-n") == 0) {
             n = (int) strtol(argv[++cont], (char **)NULL, 10);
             if (n <= 10) {
@@ -102,13 +115,20 @@ int main(int argc, char *argv[]) {
     // Gerando matriz de coeficientes A
     printf("Gerando matriz de coeficientes A...\n");
     double *A = malloc(sizeof(double)*n*n);
+    double *D = malloc(sizeof(double)*n*n);
     int km = (k+1)/2;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            if (i==j || (j>i && j<i+km) || (i>j && i<j+km))
+            if (i==j || (j>i && j<i+km) || (i>j && i<j+km)) {
                 A[i*n+j] = generateRandomA(i,j,k);
-            else
+                if (i==j)
+                    D[i*n+j] = A[i*n+j];
+                else
+                    D[i*n+j] = 0.0;
+            } else {
                 A[i*n+j] = 0.0;
+                D[i*n+j] = 0.0;
+            }
         }
     }
     printf("---------------------------------\n");
@@ -155,25 +175,31 @@ int main(int argc, char *argv[]) {
     if (it >= max_it) {
         fprintf(stderr, "O método extrapolou o limite de %d iterações!\n", max_it);
         free(A);
+        free(D);
         free(b);
         free(x);
         free(AT);
         return 1;
     } else if (it == -1) {
         free(A);
+        free(D);
         free(b);
         free(x);
         free(AT);
         return 1;
     } else {
-        printf("Método convergiu com sucesso em %d iterações!\n", it);
+        printf("Método convergiu com sucesso em %d iterações!\n", it+1);
     }
     printf("Valores de x:\n");
+    fprintf(fp, "#\n");
+    fprintf(fp, "%d\n", n);
     for (int i = 0; i < n; i++) {
         printf("%lf ", x[i]);
+        fprintf(fp, "%.15g ", x[i]);
     }
     printf("\n");
     free(A);
+    free(D);
     free(b);
     free(x);
     free(AT);

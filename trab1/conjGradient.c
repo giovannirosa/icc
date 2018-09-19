@@ -77,6 +77,7 @@ inline double normaEuc(double *A, double *b, double *x, int n) {
  * max: número máximo de iterações
  * erro: tolerância aceitável
  * Referências:
+ * M. Cristina C. Cunha, Métodos Numéricos, 2ª Edição, Editora Unicamp, 2000.
  * https://en.wikipedia.org/wiki/Conjugate_gradient_method
  * https://gist.github.com/sfujiwara/b135e0981d703986b6c2
  **/
@@ -99,7 +100,9 @@ int conjGradient(double *A, double *b, double *x, int n,
     double *Ap = malloc(sizeof(double)*n);
     double *xant = malloc(sizeof(double)*n);
     int k;
+    double meanTime = 0.0;
     for (k = 0; k < max; k++) {
+        double startTime = timestamp();
         for (int i = 0; i < n; i++) {
             Ap[i] = 0.0;
             for (int j = 0; j < n; j++) {
@@ -122,19 +125,31 @@ int conjGradient(double *A, double *b, double *x, int n,
         printf("Resíduo: %lf\n", rsnew);
         if (isnan(rsnew) || isinf(rsnew)) {
             fprintf(stderr, "ERRO: Resíduo chegou a inf ou nan!\n");
-            break;
-        }
-        if (rsnew < erro) {
-            break;
+            free(r);
+            free(p);
+            free(Ap);
+            free(xant);
+            return -1;
         }
         for (int i = 0; i < n; i++) {
             p[i] = ((rsnew/rsold) * p[i]) - r[i]; // p = (rsnew / rsold) * p - r;
         }
         rsold = rsnew;
+        double endTime = timestamp() - startTime;
+        meanTime = (meanTime + endTime) / 2;
+        if (rsnew < erro) {
+            break;
+        }
     }
-    fprintf(fp, "# residuo: <%.15g>\n", normaEuc(A,b,x,n));
+    double startTime = timestamp();
+    double normaR = normaEuc(A,b,x,n);
+    double endTime = timestamp() - startTime;
+    fprintf(fp, "# residuo: <%.15g>\n", normaR);
+    fprintf(fp, "# Tempo iter: <%lf>\n", meanTime);
+    fprintf(fp, "# Tempo residuo: <%lf>\n", endTime);
     free(r);
     free(p);
     free(Ap);
+    free(xant);
     return k;
 }
