@@ -1,4 +1,7 @@
 *.o
 labZero
 *.tar
+*.tar.gz
 cgSolver
+trab1/saida.txt
+trab1/grs14/
