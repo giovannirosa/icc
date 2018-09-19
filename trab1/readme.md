@@ -16,7 +16,7 @@ Existe um makefile neste diretório com os seguintes comandos disponíveis:
 
 ### Entrada
 
-O programa deve ser executado com os seguintes parâmetros:
+O programa deve ser executado com os seguintes parâmetros:\n
 cgSolver -n `<n>` -k `<k>` -p <ω> -i `<i>` -e <ε> -o `<arquivo_saida>`
 `<n>`: (n>10) parâmetro obrigatório definindo a dimensão do Sistema Linear.
 `<k>`: (k>1 e k ímpar)  parâmetro obrigatório definindo o número de diagonais da matriz A.
