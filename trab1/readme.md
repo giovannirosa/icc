@@ -25,6 +25,7 @@ O programa deve ser executado com os seguintes parâmetros:
 `<ω>`: parâmetro obrigatório indicando o pré-condicionador a ser utilizado:  
 - ω=0.0: sem pré-condicionador  
 - 0.0 < ω < 1.0: pré-condicionador de Jacobi  
+
 `<i>`: parâmetro obrigatório definindo o número máximo de iterações a serem executadas.  
 `<ε>`: parâmetro opcional definindo o erro aproximado absoluto máximo, considerando a norma max (relativa) em x (max|xi - xi-1| * 1/|xi| < ε).  
 `<arquivo_saida>`: parâmetro obrigatório no qual arquivo_saida é o caminho completo para o arquivo que vai conter a solução.  
