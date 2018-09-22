@@ -67,6 +67,19 @@ inline double normaEuc(double *A, double *b, double *x, int n) {
     return max;
 }
 
+/**
+ * Função que inverte uma matriz
+ * M: matriz a ser invertida
+ * n: ordem da matriz
+ **/
+inline void inverseMatrix(double *M, int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            M[i*n+j] = 1 / M[i*n+j];
+        }
+    }
+}
+
 
 /**
  * Função que resolve Ax = b utilizando método de gradientes conjugados.
@@ -78,78 +91,77 @@ inline double normaEuc(double *A, double *b, double *x, int n) {
  * erro: tolerância aceitável
  * Referências:
  * M. Cristina C. Cunha, Métodos Numéricos, 2ª Edição, Editora Unicamp, 2000.
- * https://en.wikipedia.org/wiki/Conjugate_gradient_method
- * https://gist.github.com/sfujiwara/b135e0981d703986b6c2
  **/
-int conjGradient(double *A, double *b, double *x, int n, 
-                double max, double erro, FILE *fp) {
+int conjGradient(double *A, double *M, double *b, double *x, int n, double max, double erro, FILE *fp) {
+    printf("Inicializando variáveis...\n");
+    inverseMatrix(M,n);
     double *r = malloc(sizeof(double)*n);
-    double *p = malloc(sizeof(double)*n);
-    double rsold = 0.0;
+    double *v = malloc(sizeof(double)*n);
+    double *z = malloc(sizeof(double)*n);
+    double aux = 0;
     for (int i = 0; i < n; i++) {
-        r[i] = 0.0;
-        for (int j = 0; j < n; j++) {
-            r[i] += (A[i*n+j] * x[i]) - b[i]; // r = A*x - b
-        }
-        p[i] = -r[i]; // p = -r
-        rsold += r[i] * r[i]; // rsold = r^T*r
-        x[i] = 0.0;
-    }
-    printf("Resíduo: %lf\n", rsold);
-
-    double *Ap = malloc(sizeof(double)*n);
-    double *xant = malloc(sizeof(double)*n);
-    int k;
-    double meanTime = 0.0;
-    for (k = 0; k < max; k++) {
-        double startTime = timestamp();
+        
         for (int i = 0; i < n; i++) {
-            Ap[i] = 0.0;
+
+        }
+        x[i] = 0.0; // x^0 = 0
+        r[i] = b[i]; // r = b
+        v[i] = b[i]; // v = M^-1b
+        aux += b[i] * b[i]; // aux = r^Tr
+    }
+
+    double *xant = malloc(sizeof(double)*n); // guardar x anterior
+    printf("Iniciando cálculo...\n");
+    int k;
+    for (k = 0; k < max; k++) {
+        // z = Av
+        for (int i = 0; i < n; i++) {
+            z[i] = 0.0;
             for (int j = 0; j < n; j++) {
-                Ap[i] += A[i*n+j] * p[i]; // Ap = A*p
+                int index = (i * n) + j;
+                z[i] += A[index] * v[j];
             }
         }
-        double pTAp = 0.0;
+        // s = aux/ v^Tz
+        double vtz = 0;
         for (int i = 0; i < n; i++) {
-            pTAp += p[i] * Ap[i]; // p^T*Ap
+            vtz += v[i] * z[i];
         }
-        double alpha = rsold/pTAp; // alpha = rsold / p^T*Ap
-        double rsnew = 0.0;
+        double s = aux/vtz;
+        // x^k+1 = x^k + sv
         for (int i = 0; i < n; i++) {
             xant[i] = x[i];
-            x[i] += (alpha * p[i]); // x = x + alpha * p;
-            r[i] += (alpha * Ap[i]); // r = r + alpha * Ap;
-            rsnew += r[i] * r[i]; // rsnew = r^T * r;
+            x[i] = x[i] + (v[i] * s);
         }
         fprintf(fp, "# iter %d: <%.15g>\n", k+1, normaMax(x,xant,n));
-        printf("Resíduo: %lf\n", rsnew);
-        if (isnan(rsnew) || isinf(rsnew)) {
-            fprintf(stderr, "ERRO: Resíduo chegou a inf ou nan!\n");
-            free(r);
-            free(p);
-            free(Ap);
-            free(xant);
-            return -1;
-        }
+        // r = r - sz
         for (int i = 0; i < n; i++) {
-            p[i] = ((rsnew/rsold) * p[i]) - r[i]; // p = (rsnew / rsold) * p - r;
+            r[i] = r[i] - (z[i] * s);
         }
-        rsold = rsnew;
-        double endTime = timestamp() - startTime;
-        meanTime = (meanTime + endTime) / 2;
-        if (rsnew < erro) {
+        // aux1 = r^Tr
+        double aux1 = 0;
+        for (int i = 0; i < n; i++) {
+            aux1 += r[i] * r[i];
+        }
+        if (isinf(aux1) || isnan(aux1)) {
+            fprintf(stderr, "ERRO: Vetor r chegou a inf ou nan!\n");
+            k = -1;
             break;
         }
+        printf("residuo = %lf\n", aux1);
+        if (aux1 < erro) {
+            break;
+        }
+        double m = aux1/aux;
+        aux = aux1;
+        // v = r + mv
+        for (int i = 0; i < n; i++) {
+            v[i] = r[i] + (v[i] * m);
+        }
     }
-    double startTime = timestamp();
-    double normaR = normaEuc(A,b,x,n);
-    double endTime = timestamp() - startTime;
-    fprintf(fp, "# residuo: <%.15g>\n", normaR);
-    fprintf(fp, "# Tempo iter: <%lf>\n", meanTime);
-    fprintf(fp, "# Tempo residuo: <%lf>\n", endTime);
-    free(r);
-    free(p);
-    free(Ap);
     free(xant);
+    free(r);
+    free(v);
+    free(z);
     return k;
 }

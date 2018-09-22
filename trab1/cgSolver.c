@@ -116,18 +116,24 @@ int main(int argc, char *argv[]) {
     printf("Gerando matriz de coeficientes A...\n");
     double *A = malloc(sizeof(double)*n*n);
     double *D = malloc(sizeof(double)*n*n);
+    double *I = malloc(sizeof(double)*n*n);
     int km = (k+1)/2;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             if (i==j || (j>i && j<i+km) || (i>j && i<j+km)) {
                 A[i*n+j] = generateRandomA(i,j,k);
-                if (i==j)
+                if (i==j) {
                     D[i*n+j] = A[i*n+j];
-                else
+                    I[i*n+j] = 1.0;
+                }
+                else {
                     D[i*n+j] = 0.0;
+                    I[i*n+j] = 0.0;
+                }
             } else {
                 A[i*n+j] = 0.0;
                 D[i*n+j] = 0.0;
+                I[i*n+j] = 0.0;
             }
         }
     }
@@ -170,7 +176,7 @@ int main(int argc, char *argv[]) {
     printf("\n---------------------------------\n");
     printf("Rodando método de gradientes conjugados...\n");
     double *x = malloc(sizeof(double)*n);
-    int it = conjGradient(A,b,x,n,max_it,e,fp);
+    int it = conjGradient(A,I,b,x,n,max_it,e,fp);
     printf("---------------------------------\n");
     if (it >= max_it) {
         fprintf(stderr, "O método extrapolou o limite de %d iterações!\n", max_it);

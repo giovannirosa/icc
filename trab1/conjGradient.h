@@ -34,15 +34,15 @@ double normaEuc(double *A, double *b, double *x, int n);
 /**
  * Função que resolve Ax = b utilizando método de gradientes conjugados.
  * A: matriz de coeficientes
+ * M: matriz condicionadora
  * b: vetor de termos independentes
  * x: vetor de incógnitas
  * n: ordem da matriz
  * max: número máximo de iterações
  * erro: tolerância aceitável
  * Referências:
- * https://en.wikipedia.org/wiki/Conjugate_gradient_method
- * https://gist.github.com/sfujiwara/b135e0981d703986b6c2
+ * M. Cristina C. Cunha, Métodos Numéricos, 2ª Edição, Editora Unicamp, 2000.
  */
-int conjGradient(double *A, double *b, double *x, int n, double max, double erro, FILE *fp);
+int conjGradient(double *A, double *M, double *b, double *x, int n, double max, double erro, FILE *fp);
 
 #endif // __CONJGRADIENT_H__
