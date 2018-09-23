@@ -162,13 +162,22 @@ int main(int argc, char *argv[]) {
         printf("\n");
     }
 
+    printf("Matriz identidade:\n");
     for (int i = 0; i < n; i++) {
-        double res = 0.0;
         for (int j = 0; j < n; j++) {
-            res += b[i] * A[i*n+j];
+            printf("%lf ", I[i*n+j]);
         }
-        b[i] = res;
+        printf("\n");
     }
+
+    double *bAux = malloc(sizeof(double)*n);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            bAux[i] += b[j] * AT[i*n+j];
+        }
+    }
+    free(b);
+    b = bAux;
     printf("Termos independentes:\n");
     for (int i = 0; i < n; i++) {
         printf("%lf ", b[i]);
@@ -176,7 +185,10 @@ int main(int argc, char *argv[]) {
     printf("\n---------------------------------\n");
     printf("Rodando método de gradientes conjugados...\n");
     double *x = malloc(sizeof(double)*n);
-    int it = conjGradient(A,I,b,x,n,max_it,e,fp);
+    double *M;
+    if (p == 0.0) M = I;
+    else if (p > 0.0 && p < 1.0) M = D;
+    int it = conjGradient(A,M,b,x,n,max_it,e,fp);
     printf("---------------------------------\n");
     if (it >= max_it) {
         fprintf(stderr, "O método extrapolou o limite de %d iterações!\n", max_it);

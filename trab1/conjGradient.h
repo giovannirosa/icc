@@ -31,6 +31,8 @@ double normaMax(double *X, double *Y, int n);
  */
 double normaEuc(double *A, double *b, double *x, int n);
 
+void inverseMatrix(double *M, int n);
+
 /**
  * Função que resolve Ax = b utilizando método de gradientes conjugados.
  * A: matriz de coeficientes

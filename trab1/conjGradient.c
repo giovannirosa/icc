@@ -59,7 +59,7 @@ inline double normaEuc(double *A, double *b, double *x, int n) {
     for (int i = 0; i < n; i++) {
         double r = 0.0;
         for (int j = 0; j < n; j++) {
-            r += (A[i*n+j] * x[i]) - b[i]; // r = A*x - b
+            r += b[j] - (A[i*n+j] * x[j]); // r = b - A*x
         }
         if (r > max)
             max = r;
@@ -75,11 +75,11 @@ inline double normaEuc(double *A, double *b, double *x, int n) {
 inline void inverseMatrix(double *M, int n) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
+            if (M[i*n+j] == 0) continue;
             M[i*n+j] = 1 / M[i*n+j];
         }
     }
 }
-
 
 /**
  * Função que resolve Ax = b utilizando método de gradientes conjugados.
@@ -92,38 +92,55 @@ inline void inverseMatrix(double *M, int n) {
  * Referências:
  * M. Cristina C. Cunha, Métodos Numéricos, 2ª Edição, Editora Unicamp, 2000.
  **/
-int conjGradient(double *A, double *M, double *b, double *x, int n, double max, double erro, FILE *fp) {
-    printf("Inicializando variáveis...\n");
+int conjGradient(double *A, double *M, double *b, double *x,
+                     int n, double max, double erro, FILE *fp) {
     inverseMatrix(M,n);
+    // Transformando matriz em simetrica
+    printf("Transformando matriz com condicionadora...\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            A[i*n+j] = A[i*n+j] * M[i*n+j];
+        }
+    }
+    double *bAux = malloc(sizeof(double)*n);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            bAux[i] += b[j] * M[i*n+j];
+        }
+    }
+    free(b);
+    b = bAux;
+    printf("Inicializando variáveis...\n");
+    // printMatrix(M,n);
     double *r = malloc(sizeof(double)*n);
     double *v = malloc(sizeof(double)*n);
     double *z = malloc(sizeof(double)*n);
-    double aux = 0;
+    double *y = malloc(sizeof(double)*n);
+    double aux = 0.0;
     for (int i = 0; i < n; i++) {
-        
-        for (int i = 0; i < n; i++) {
-
-        }
-        x[i] = 0.0; // x^0 = 0
         r[i] = b[i]; // r = b
-        v[i] = b[i]; // v = M^-1b
-        aux += b[i] * b[i]; // aux = r^Tr
+        for (int j = 0; j < n; j++) {
+            v[i] += M[i*n+j] * b[j]; // v = M^-1b
+            y[i] += M[i*n+j] * b[j]; // y = M^-1r
+        }
+        aux += y[i] * r[i]; // aux = y^Tr
     }
 
     double *xant = malloc(sizeof(double)*n); // guardar x anterior
     printf("Iniciando cálculo...\n");
     int k;
+    double meanTime = 0.0;
     for (k = 0; k < max; k++) {
+        double startTime = timestamp();
         // z = Av
         for (int i = 0; i < n; i++) {
             z[i] = 0.0;
             for (int j = 0; j < n; j++) {
-                int index = (i * n) + j;
-                z[i] += A[index] * v[j];
+                z[i] += A[i*n+j] * v[j];
             }
         }
         // s = aux/ v^Tz
-        double vtz = 0;
+        double vtz = 0.0;
         for (int i = 0; i < n; i++) {
             vtz += v[i] * z[i];
         }
@@ -138,28 +155,49 @@ int conjGradient(double *A, double *M, double *b, double *x, int n, double max, 
         for (int i = 0; i < n; i++) {
             r[i] = r[i] - (z[i] * s);
         }
-        // aux1 = r^Tr
-        double aux1 = 0;
+        // y = M^-1r
         for (int i = 0; i < n; i++) {
-            aux1 += r[i] * r[i];
+            y[i] = 0.0;
+            for (int j = 0; j < n; j++) {
+                y[i] += M[i*n+j] * r[j];
+            }
         }
-        if (isinf(aux1) || isnan(aux1)) {
+        // rTr = r^Tr
+        double rTr = 0.0;
+        for (int i = 0; i < n; i++) {
+            rTr += r[i] * r[i];
+        }
+        if (isinf(rTr) || isnan(rTr)) {
             fprintf(stderr, "ERRO: Vetor r chegou a inf ou nan!\n");
             k = -1;
             break;
         }
-        printf("residuo = %lf\n", aux1);
-        if (aux1 < erro) {
-            break;
+        double aux1 = 0.0;
+        // aux1 = y^Tr
+        for (int i = 0; i < n; i++) {
+            aux1 += y[i] * r[i];
         }
         double m = aux1/aux;
         aux = aux1;
-        // v = r + mv
+        // v = y + mv
         for (int i = 0; i < n; i++) {
-            v[i] = r[i] + (v[i] * m);
+            v[i] = y[i] + (v[i] * m);
+        }
+        double endTime = timestamp() - startTime;
+        meanTime = (meanTime + endTime) / 2;
+        printf("residuo = %lf\n", rTr);
+        if (rTr < erro) {
+            break;
         }
     }
+    double startTime = timestamp();
+    double residuo = normaEuc(A,b,x,n);
+    double endTime = timestamp() - startTime;
+    fprintf(fp, "# residuo: %.15g\n", residuo);
+    fprintf(fp, "# Tempo iter: %.15g\n", meanTime);
+    fprintf(fp, "# Tempo residuo: %.15g\n", endTime);
     free(xant);
+    free(y);
     free(r);
     free(v);
     free(z);
