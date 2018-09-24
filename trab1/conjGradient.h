@@ -31,7 +31,19 @@ double normaMax(double *X, double *Y, int n);
  */
 double normaEuc(double *A, double *b, double *x, int n);
 
+/**
+ * Função que inverte uma matriz
+ * M: matriz a ser invertida
+ * n: ordem da matriz
+ **/
 void inverseMatrix(double *M, int n);
+
+/**
+ * Função que retorna a matrix transposta
+ * lines: numero de linhas
+ * cols: numero de colunas
+ **/
+double* transposeMatrix(double *A, int lines, int cols);
 
 /**
  * Função que resolve Ax = b utilizando método de gradientes conjugados.

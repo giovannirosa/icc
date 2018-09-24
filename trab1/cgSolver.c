@@ -27,23 +27,6 @@ inline static double generateRandomB( unsigned int k ) {
   return (double)(k<<2) * (double)rand() * invRandMax;
 }
 
-/**
- * Função que retorna a matrix transposta
- * lines: numero de linhas
- * cols: numero de colunas
- **/
-double* transposeMatrix(double *A, int lines, int cols) {
-    double *T = malloc(sizeof(double)*lines*cols);
-    for (int i = 0; i < lines; i++) {
-        for (int j = 0; j < cols; j++) {
-            int index = (i * lines) + j;
-            int indexT = (j * lines) + i;
-            T[indexT] = A[index];
-        }
-    }
-    return T;
-}
-
 int main(int argc, char *argv[]) {
     srand(20182);
     int n = -1, k = -1, max_it = -1;
@@ -125,8 +108,7 @@ int main(int argc, char *argv[]) {
                 if (i==j) {
                     D[i*n+j] = A[i*n+j];
                     I[i*n+j] = 1.0;
-                }
-                else {
+                } else {
                     D[i*n+j] = 0.0;
                     I[i*n+j] = 0.0;
                 }
@@ -145,43 +127,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < n; i++) {
         b[i] = generateRandomB(k);
     }
-    printf("\n---------------------------------\n");
-    // Transformando matriz em simetrica
-    printf("Transformando matriz em simetrica...\n");
-    double *AT = transposeMatrix(A,n,n);
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            A[i*n+j] = A[i*n+j] * AT[i*n+j];
-        }
-    }
-    printf("Matriz de coeficientes:\n");
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            printf("%lf ", A[i*n+j]);
-        }
-        printf("\n");
-    }
 
-    printf("Matriz identidade:\n");
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            printf("%lf ", I[i*n+j]);
-        }
-        printf("\n");
-    }
-
-    double *bAux = malloc(sizeof(double)*n);
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            bAux[i] += b[j] * AT[i*n+j];
-        }
-    }
-    free(b);
-    b = bAux;
-    printf("Termos independentes:\n");
-    for (int i = 0; i < n; i++) {
-        printf("%lf ", b[i]);
-    }
     printf("\n---------------------------------\n");
     printf("Rodando método de gradientes conjugados...\n");
     double *x = malloc(sizeof(double)*n);
@@ -194,16 +140,16 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "O método extrapolou o limite de %d iterações!\n", max_it);
         free(A);
         free(D);
+        free(I);
         free(b);
         free(x);
-        free(AT);
         return 1;
     } else if (it == -1) {
         free(A);
         free(D);
+        free(I);
         free(b);
         free(x);
-        free(AT);
         return 1;
     } else {
         printf("Método convergiu com sucesso em %d iterações!\n", it+1);
@@ -218,9 +164,9 @@ int main(int argc, char *argv[]) {
     printf("\n");
     free(A);
     free(D);
+    free(I);
     free(b);
     free(x);
-    free(AT);
 
     return 0;
 }

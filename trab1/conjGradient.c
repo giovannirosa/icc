@@ -82,6 +82,43 @@ inline void inverseMatrix(double *M, int n) {
 }
 
 /**
+ * Função que retorna a matrix transposta
+ * lines: numero de linhas
+ * cols: numero de colunas
+ **/
+inline double* transposeMatrix(double *A, int lines, int cols) {
+    double *T = malloc(sizeof(double)*lines*cols);
+    for (int i = 0; i < lines; i++) {
+        for (int j = 0; j < cols; j++) {
+            int index = (i * lines) + j;
+            int indexT = (j * lines) + i;
+            T[indexT] = A[index];
+        }
+    }
+    return T;
+}
+
+// inline double* findLower(double *A, int n) {
+//     double *L = malloc(sizeof(double)*n*n);
+//     for (int i = 0; i < n; i++) {
+//         A[i*n+i] = sqrt(A[i*n+i]);
+//         for (int j = 0; j < n; j++) {
+//             if (A[i*n+j] != 0) A[i*n+j] = A[i*n+j] / A[i*n+i];
+//         }
+//         for (int j = i+1; j < n; j++) {
+//             for (int k = j; k < n; k++) {
+//                 if (A[j*n+k] != 0) A[j*n+k] = A[j*n+k] - A[i*n+k] * A[i*n+j];
+//             }
+//         }
+//     }
+//     for (int i = 0; i < n; i++) {
+//         for (int j = i+1; j < n; j++) {
+//             A[i*n+j] = 0.0;
+//         }
+//     }
+// }
+
+/**
  * Função que resolve Ax = b utilizando método de gradientes conjugados.
  * A: matriz de coeficientes
  * b: vetor de termos independentes
@@ -94,22 +131,38 @@ inline void inverseMatrix(double *M, int n) {
  **/
 int conjGradient(double *A, double *M, double *b, double *x,
                      int n, double max, double erro, FILE *fp) {
-    inverseMatrix(M,n);
     // Transformando matriz em simetrica
+    printf("Transformando matriz em simetrica...\n");
+    double *AT = transposeMatrix(A,n,n);
+    double *ATA = malloc(sizeof(double)*n*n);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            ATA[i*n+j] = A[i*n+j] * AT[i*n+j];
+        }
+    }
+    double *ATb = malloc(sizeof(double)*n);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            ATb[i] += AT[i*n+j] * b[j];
+        }
+    }
+    inverseMatrix(M,n); // invertendo M
+    // Transformando matriz com condicionadora
+    // Ax = b → M^−1Ax = M^−1b
     printf("Transformando matriz com condicionadora...\n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            A[i*n+j] = A[i*n+j] * M[i*n+j];
+            ATA[i*n+j] = M[i*n+j] * ATA[i*n+j];
         }
     }
     double *bAux = malloc(sizeof(double)*n);
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            bAux[i] += b[j] * M[i*n+j];
+            bAux[i] += M[i*n+j] * ATb[j];
         }
     }
-    free(b);
-    b = bAux;
+    free(ATb);
+    ATb = bAux;
     printf("Inicializando variáveis...\n");
     // printMatrix(M,n);
     double *r = malloc(sizeof(double)*n);
@@ -118,10 +171,10 @@ int conjGradient(double *A, double *M, double *b, double *x,
     double *y = malloc(sizeof(double)*n);
     double aux = 0.0;
     for (int i = 0; i < n; i++) {
-        r[i] = b[i]; // r = b
+        r[i] = ATb[i]; // r = b
         for (int j = 0; j < n; j++) {
-            v[i] += M[i*n+j] * b[j]; // v = M^-1b
-            y[i] += M[i*n+j] * b[j]; // y = M^-1r
+            v[i] += M[i*n+j] * ATb[j]; // v = M^-1b
+            y[i] += M[i*n+j] * ATb[j]; // y = M^-1r
         }
         aux += y[i] * r[i]; // aux = y^Tr
     }
@@ -136,7 +189,7 @@ int conjGradient(double *A, double *M, double *b, double *x,
         for (int i = 0; i < n; i++) {
             z[i] = 0.0;
             for (int j = 0; j < n; j++) {
-                z[i] += A[i*n+j] * v[j];
+                z[i] += ATA[i*n+j] * v[j];
             }
         }
         // s = aux/ v^Tz
@@ -150,7 +203,7 @@ int conjGradient(double *A, double *M, double *b, double *x,
             xant[i] = x[i];
             x[i] = x[i] + (v[i] * s);
         }
-        fprintf(fp, "# iter %d: <%.15g>\n", k+1, normaMax(x,xant,n));
+        fprintf(fp, "# iter %d: %.15g\n", k+1, normaMax(x,xant,n));
         // r = r - sz
         for (int i = 0; i < n; i++) {
             r[i] = r[i] - (z[i] * s);

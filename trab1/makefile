@@ -1,5 +1,5 @@
     CC     = gcc -std=c11 -g
-    CFLAGS = 
+    CFLAGS =-Wall -g
     LFLAGS =-lm
 
       PROG = cgSolver
