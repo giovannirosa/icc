@@ -72,13 +72,15 @@ inline double normaEuc(double *A, double *b, double *x, int n) {
  * M: matriz a ser invertida
  * n: ordem da matriz
  **/
-inline void inverseMatrix(double *M, int n) {
+inline double* inverseMatrix(double *M, int n) {
+    double *V = malloc(sizeof(double)*n*n);
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             if (M[i*n+j] == 0) continue;
-            M[i*n+j] = 1 / M[i*n+j];
+            V[i*n+j] = 1 / M[i*n+j];
         }
     }
+    return V;
 }
 
 /**
@@ -98,26 +100,6 @@ inline double* transposeMatrix(double *A, int lines, int cols) {
     return T;
 }
 
-// inline double* findLower(double *A, int n) {
-//     double *L = malloc(sizeof(double)*n*n);
-//     for (int i = 0; i < n; i++) {
-//         A[i*n+i] = sqrt(A[i*n+i]);
-//         for (int j = 0; j < n; j++) {
-//             if (A[i*n+j] != 0) A[i*n+j] = A[i*n+j] / A[i*n+i];
-//         }
-//         for (int j = i+1; j < n; j++) {
-//             for (int k = j; k < n; k++) {
-//                 if (A[j*n+k] != 0) A[j*n+k] = A[j*n+k] - A[i*n+k] * A[i*n+j];
-//             }
-//         }
-//     }
-//     for (int i = 0; i < n; i++) {
-//         for (int j = i+1; j < n; j++) {
-//             A[i*n+j] = 0.0;
-//         }
-//     }
-// }
-
 /**
  * Função que resolve Ax = b utilizando método de gradientes conjugados.
  * A: matriz de coeficientes
@@ -131,6 +113,7 @@ inline double* transposeMatrix(double *A, int lines, int cols) {
  **/
 int conjGradient(double *A, double *M, double *b, double *x,
                      int n, double max, double erro, FILE *fp) {
+    // ----------------------------------------------------------
     // Transformando matriz em simetrica
     printf("Transformando matriz em simetrica...\n");
     double *AT = transposeMatrix(A,n,n);
@@ -146,10 +129,15 @@ int conjGradient(double *A, double *M, double *b, double *x,
             ATb[i] += AT[i*n+j] * b[j];
         }
     }
-    inverseMatrix(M,n); // invertendo M
+    // printf("Matriz M:\n");
+    // printMatrix(M,n);
+    // ----------------------------------------------------------
+    printf("Invertendo matriz condicionadora...\n");
+    M = inverseMatrix(M,n); // invertendo M
+    // ----------------------------------------------------------
     // Transformando matriz com condicionadora
     // Ax = b → M^−1Ax = M^−1b
-    printf("Transformando matriz com condicionadora...\n");
+    printf("Transformando sistema com condicionadora...\n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             ATA[i*n+j] = M[i*n+j] * ATA[i*n+j];
@@ -163,14 +151,17 @@ int conjGradient(double *A, double *M, double *b, double *x,
     }
     free(ATb);
     ATb = bAux;
+    // ----------------------------------------------------------
     printf("Inicializando variáveis...\n");
     // printMatrix(M,n);
     double *r = malloc(sizeof(double)*n);
     double *v = malloc(sizeof(double)*n);
     double *z = malloc(sizeof(double)*n);
     double *y = malloc(sizeof(double)*n);
+    double *xant = malloc(sizeof(double)*n); // guardar x anterior
     double aux = 0.0;
     for (int i = 0; i < n; i++) {
+        x[i] = 0.0;
         r[i] = ATb[i]; // r = b
         for (int j = 0; j < n; j++) {
             v[i] += M[i*n+j] * ATb[j]; // v = M^-1b
@@ -178,13 +169,13 @@ int conjGradient(double *A, double *M, double *b, double *x,
         }
         aux += y[i] * r[i]; // aux = y^Tr
     }
-
-    double *xant = malloc(sizeof(double)*n); // guardar x anterior
+    // ----------------------------------------------------------
     printf("Iniciando cálculo...\n");
     int k;
     double meanTime = 0.0;
     for (k = 0; k < max; k++) {
         double startTime = timestamp();
+        // ----------------------------------------------------------
         // z = Av
         for (int i = 0; i < n; i++) {
             z[i] = 0.0;
@@ -192,22 +183,26 @@ int conjGradient(double *A, double *M, double *b, double *x,
                 z[i] += ATA[i*n+j] * v[j];
             }
         }
+        // ----------------------------------------------------------
         // s = aux/ v^Tz
         double vtz = 0.0;
         for (int i = 0; i < n; i++) {
             vtz += v[i] * z[i];
         }
         double s = aux/vtz;
+        // ----------------------------------------------------------
         // x^k+1 = x^k + sv
         for (int i = 0; i < n; i++) {
             xant[i] = x[i];
             x[i] = x[i] + (v[i] * s);
         }
         fprintf(fp, "# iter %d: %.15g\n", k+1, normaMax(x,xant,n));
+        // ----------------------------------------------------------
         // r = r - sz
         for (int i = 0; i < n; i++) {
             r[i] = r[i] - (z[i] * s);
         }
+        // ----------------------------------------------------------
         // y = M^-1r
         for (int i = 0; i < n; i++) {
             y[i] = 0.0;
@@ -215,6 +210,7 @@ int conjGradient(double *A, double *M, double *b, double *x,
                 y[i] += M[i*n+j] * r[j];
             }
         }
+        // ----------------------------------------------------------
         // rTr = r^Tr
         double rTr = 0.0;
         for (int i = 0; i < n; i++) {
@@ -225,30 +221,38 @@ int conjGradient(double *A, double *M, double *b, double *x,
             k = -1;
             break;
         }
-        double aux1 = 0.0;
+        // ----------------------------------------------------------
         // aux1 = y^Tr
+        double aux1 = 0.0;
         for (int i = 0; i < n; i++) {
             aux1 += y[i] * r[i];
         }
         double m = aux1/aux;
         aux = aux1;
+        // ----------------------------------------------------------
         // v = y + mv
         for (int i = 0; i < n; i++) {
             v[i] = y[i] + (v[i] * m);
         }
+        // ----------------------------------------------------------
         double endTime = timestamp() - startTime;
-        meanTime = (meanTime + endTime) / 2;
+        meanTime += endTime;
         printf("residuo = %lf\n", rTr);
         if (rTr < erro) {
             break;
         }
     }
+    // printf("meanTime = %lf, k = %d\n", meanTime, k);
+    meanTime /= k+1;
+    // ----------------------------------------------------------
     double startTime = timestamp();
     double residuo = normaEuc(A,b,x,n);
     double endTime = timestamp() - startTime;
+    // ----------------------------------------------------------
     fprintf(fp, "# residuo: %.15g\n", residuo);
     fprintf(fp, "# Tempo iter: %.15g\n", meanTime);
     fprintf(fp, "# Tempo residuo: %.15g\n", endTime);
+    // ----------------------------------------------------------
     free(xant);
     free(y);
     free(r);

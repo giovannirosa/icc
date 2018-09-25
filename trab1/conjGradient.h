@@ -36,7 +36,7 @@ double normaEuc(double *A, double *b, double *x, int n);
  * M: matriz a ser invertida
  * n: ordem da matriz
  **/
-void inverseMatrix(double *M, int n);
+double* inverseMatrix(double *M, int n);
 
 /**
  * Função que retorna a matrix transposta

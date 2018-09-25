@@ -6,7 +6,7 @@
 #include <math.h>
 
 double timestamp(void);
-int doublecmp(double a, double b);
+int doublecmp(double a, double b, double eps);
 
 #endif // __UTILS_H__
 

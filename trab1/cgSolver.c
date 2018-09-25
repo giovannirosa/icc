@@ -43,6 +43,8 @@ int main(int argc, char *argv[]) {
             printf("<ω>: parâmetro obrigatório indicando o pré-condicionador a ser utilizado:\n");
             printf("\tω=0.0: sem pré-condicionador\n");
             printf("\t0.0 < ω < 1.0: pré-condicionador de Jacobi\n");
+            printf("\tω=1.0 pré-condicionador de Gauss-Seidel\n");
+            printf("\t1.0 < ω < 2.0: pré-condicionador SSOR\n");
             printf("<i>: parâmetro obrigatório definindo o número máximo de iterações a serem executadas.\n");
             printf("<ε>: parâmetro opcional definindo o erro aproximado absoluto máximo, considerando a norma max (relativa) em x (max|xi - xi-1| * 1/|xi| < ε).\n");
             printf("<arquivo_saida>: parâmetro obrigatório no qual arquivo_saida é o caminho completo para o arquivo que vai conter a solução.\n");
@@ -99,6 +101,8 @@ int main(int argc, char *argv[]) {
     printf("Gerando matriz de coeficientes A...\n");
     double *A = malloc(sizeof(double)*n*n);
     double *D = malloc(sizeof(double)*n*n);
+    double *L = malloc(sizeof(double)*n*n);
+    double *U = malloc(sizeof(double)*n*n);
     double *I = malloc(sizeof(double)*n*n);
     int km = (k+1)/2;
     for (int i = 0; i < n; i++) {
@@ -117,8 +121,21 @@ int main(int argc, char *argv[]) {
                 D[i*n+j] = 0.0;
                 I[i*n+j] = 0.0;
             }
+            if (j>i) {
+                U[i*n+j] = A[i*n+j];
+            } else if (j<i) {
+                L[i*n+j] = A[i*n+j];
+            }
         }
     }
+    // printf("Matriz A:\n");
+    // printMatrix(A,n);
+    // printf("Matriz D:\n");
+    // printMatrix(D,n);
+    // printf("Matriz L:\n");
+    // printMatrix(L,n);
+    // printf("Matriz U:\n");
+    // printMatrix(U,n);
     printf("---------------------------------\n");
 
     // Gerando vetor de termos independentes B
@@ -132,14 +149,29 @@ int main(int argc, char *argv[]) {
     printf("Rodando método de gradientes conjugados...\n");
     double *x = malloc(sizeof(double)*n);
     double *M;
+    double startTime = timestamp();
     if (p == 0.0) M = I;
     else if (p > 0.0 && p < 1.0) M = D;
+    else if (p >= 1.0) {
+        M = malloc(sizeof(double)*n*n);
+        double *Dinv = inverseMatrix(D,n);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                M[i*n+j] = (D[i*n+j]+p*L[i*n+j])*Dinv[i*n+j]*(D[i*n+j]+p*U[i*n+j]);
+            }
+        }
+        free(Dinv);
+    }
+    double endTime = timestamp() - startTime;
     int it = conjGradient(A,M,b,x,n,max_it,e,fp);
+    fprintf(fp, "# Tempo PC: %.15g\n", endTime);
     printf("---------------------------------\n");
     if (it >= max_it) {
         fprintf(stderr, "O método extrapolou o limite de %d iterações!\n", max_it);
         free(A);
         free(D);
+        free(L);
+        free(U);
         free(I);
         free(b);
         free(x);
@@ -147,6 +179,8 @@ int main(int argc, char *argv[]) {
     } else if (it == -1) {
         free(A);
         free(D);
+        free(L);
+        free(U);
         free(I);
         free(b);
         free(x);
@@ -164,6 +198,8 @@ int main(int argc, char *argv[]) {
     printf("\n");
     free(A);
     free(D);
+    free(L);
+    free(U);
     free(I);
     free(b);
     free(x);

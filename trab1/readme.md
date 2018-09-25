@@ -8,11 +8,15 @@ Existe um makefile neste diretório com os seguintes comandos disponíveis:
 
 * make: compila os arquivos
 * make clean: limpa os arquivos
-* make clean: limpa e deleta os arquivos gerados
+* make purge: limpa e deleta os arquivos gerados
 
 ### Pré-requisitos
 
 É necessario gcc para compilar o código.
+
+## Testes
+
+A seguir será detalhado a entrada e saída do programa para realização de testes.
 
 ### Entrada
 
@@ -28,11 +32,38 @@ O programa deve ser executado com os seguintes parâmetros:
 
 `<i>`: parâmetro obrigatório definindo o número máximo de iterações a serem executadas.  
 `<ε>`: parâmetro opcional definindo o erro aproximado absoluto máximo, considerando a norma max (relativa) em x `(max|xi - xi-1| * 1/|xi| < ε)`.  
-`<arquivo_saida>`: parâmetro obrigatório no qual arquivo_saida é o caminho completo para o arquivo que vai conter a solução.  
+`<arquivo_saida>`: parâmetro obrigatório no qual arquivo_saida é o caminho completo para o arquivo que vai conter a solução.
+
+### Saída
+
+```
+# login1 Nome1
+# login2 Nome2
+#
+# iter 1: <||x||>
+# iter 2: <||x||>
+# ...
+# iter k: <||x||>
+# residuo: <||r||>
+# Tempo PC: <tempo para cálculo do pré-condicionador>
+# Tempo iter: <tempo para resolver uma iteração do método>
+# Tempo residuo: <tempo para calcular o residuo do SL>
+#
+n
+x_1 x_2 ... x_n
+```
+
+Onde:
+- iter k: norma máxima do erro aproximado em x após a k-ésima iteração (max|xi - xi-1|);
+- residuo: A norma euclidiana do resíduo (||r||), onde r= b - Ax
+- Tempo: deve ser calculado em segundos, utilizando-se a função especificada abaixo.
+- Tempo PC: tempo para calcular a matriz pré-condicionante M e preparar o SL para o uso do pré-condicionante. Não incluir tempo de leitura ou geração da matriz de entrada, nem a impressão dos resultados ou cálculo do erro.
+- Tempo iter: Tempo médio para calcular cada iteração do método, inclusive o cálculo do erro.
+- Tempo residuo: Tempo para calcular a norma do resíduo ao final do processo.
 
 ### Limitações encontradas no projeto [BUGS]
 
-Pré-condicionadores não implementados.
+Pré-condicionadores fazem o sistema linear convergir em 1 iteração.
 
 ## Autor
 
