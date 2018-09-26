@@ -48,7 +48,7 @@ double* transposeMatrix(double *A, int lines, int cols);
 /**
  * Função que resolve Ax = b utilizando método de gradientes conjugados.
  * A: matriz de coeficientes
- * M: matriz condicionadora
+ * p: peso
  * b: vetor de termos independentes
  * x: vetor de incógnitas
  * n: ordem da matriz
