@@ -57,6 +57,6 @@ double* transposeMatrix(double *A, int lines, int cols);
  * Referências:
  * M. Cristina C. Cunha, Métodos Numéricos, 2ª Edição, Editora Unicamp, 2000.
  */
-int conjGradient(double *A, double *M, double *b, double *x, int n, double max, double erro, FILE *fp);
+int conjGradient(double *A, double p, double *b, double *x, int n, double max, double erro, FILE *fp);
 
 #endif // __CONJGRADIENT_H__

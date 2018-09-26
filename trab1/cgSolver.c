@@ -100,31 +100,11 @@ int main(int argc, char *argv[]) {
     // Gerando matriz de coeficientes A
     printf("Gerando matriz de coeficientes A...\n");
     double *A = malloc(sizeof(double)*n*n);
-    double *D = malloc(sizeof(double)*n*n);
-    double *L = malloc(sizeof(double)*n*n);
-    double *U = malloc(sizeof(double)*n*n);
-    double *I = malloc(sizeof(double)*n*n);
     int km = (k+1)/2;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             if (i==j || (j>i && j<i+km) || (i>j && i<j+km)) {
                 A[i*n+j] = generateRandomA(i,j,k);
-                if (i==j) {
-                    D[i*n+j] = A[i*n+j];
-                    I[i*n+j] = 1.0;
-                } else {
-                    D[i*n+j] = 0.0;
-                    I[i*n+j] = 0.0;
-                }
-            } else {
-                A[i*n+j] = 0.0;
-                D[i*n+j] = 0.0;
-                I[i*n+j] = 0.0;
-            }
-            if (j>i) {
-                U[i*n+j] = A[i*n+j];
-            } else if (j<i) {
-                L[i*n+j] = A[i*n+j];
             }
         }
     }
@@ -146,42 +126,18 @@ int main(int argc, char *argv[]) {
     }
 
     printf("\n---------------------------------\n");
-    printf("Rodando método de gradientes conjugados...\n");
     double *x = malloc(sizeof(double)*n);
-    double *M;
-    double startTime = timestamp();
-    if (p == 0.0) M = I;
-    else if (p > 0.0 && p < 1.0) M = D;
-    else if (p >= 1.0) {
-        M = malloc(sizeof(double)*n*n);
-        double *Dinv = inverseMatrix(D,n);
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                M[i*n+j] = (D[i*n+j]+p*L[i*n+j])*Dinv[i*n+j]*(D[i*n+j]+p*U[i*n+j]);
-            }
-        }
-        free(Dinv);
-    }
-    double endTime = timestamp() - startTime;
-    int it = conjGradient(A,M,b,x,n,max_it,e,fp);
-    fprintf(fp, "# Tempo PC: %.15g\n", endTime);
+    printf("Rodando método de gradientes conjugados...\n");
+    int it = conjGradient(A,p,b,x,n,max_it,e,fp);
     printf("---------------------------------\n");
     if (it >= max_it) {
         fprintf(stderr, "O método extrapolou o limite de %d iterações!\n", max_it);
         free(A);
-        free(D);
-        free(L);
-        free(U);
-        free(I);
         free(b);
         free(x);
         return 1;
     } else if (it == -1) {
         free(A);
-        free(D);
-        free(L);
-        free(U);
-        free(I);
         free(b);
         free(x);
         return 1;
@@ -197,10 +153,6 @@ int main(int argc, char *argv[]) {
     }
     printf("\n");
     free(A);
-    free(D);
-    free(L);
-    free(U);
-    free(I);
     free(b);
     free(x);
 

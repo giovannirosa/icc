@@ -111,8 +111,12 @@ inline double* transposeMatrix(double *A, int lines, int cols) {
  * Referências:
  * M. Cristina C. Cunha, Métodos Numéricos, 2ª Edição, Editora Unicamp, 2000.
  **/
-int conjGradient(double *A, double *M, double *b, double *x,
+int conjGradient(double *A, double p, double *b, double *x,
                      int n, double max, double erro, FILE *fp) {
+    double *D = malloc(sizeof(double)*n*n);
+    double *L = malloc(sizeof(double)*n*n);
+    double *U = malloc(sizeof(double)*n*n);
+    double *I = malloc(sizeof(double)*n*n);
     // ----------------------------------------------------------
     // Transformando matriz em simetrica
     printf("Transformando matriz em simetrica...\n");
@@ -129,6 +133,38 @@ int conjGradient(double *A, double *M, double *b, double *x,
             ATb[i] += AT[i*n+j] * b[j];
         }
     }
+    // ----------------------------------------------------------
+    printf("Coletando D, L, U...\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (i==j) {
+                D[i*n+j] = ATA[i*n+j];
+                I[i*n+j] = 1.0;
+            }
+            if (j>i) {
+                U[i*n+j] = ATA[i*n+j];
+            } else if (j<i) {
+                L[i*n+j] = ATA[i*n+j];
+            }
+        }
+    }
+    // ----------------------------------------------------------
+    printf("Calculando pré-condicionadora...\n");
+    double *M;
+    double startCond = timestamp();
+    if (p == 0.0) M = I;
+    else if (p > 0.0 && p < 1.0) M = D;
+    else if (p >= 1.0) {
+        M = malloc(sizeof(double)*n*n);
+        double *Dinv = inverseMatrix(D,n);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                M[i*n+j] = (D[i*n+j]+p*L[i*n+j])*Dinv[i*n+j]*(D[i*n+j]+p*U[i*n+j]);
+            }
+        }
+        free(Dinv);
+    }
+    double endCond = timestamp() - startCond;
     // printf("Matriz M:\n");
     // printMatrix(M,n);
     // ----------------------------------------------------------
@@ -252,7 +288,12 @@ int conjGradient(double *A, double *M, double *b, double *x,
     fprintf(fp, "# residuo: %.15g\n", residuo);
     fprintf(fp, "# Tempo iter: %.15g\n", meanTime);
     fprintf(fp, "# Tempo residuo: %.15g\n", endTime);
+    fprintf(fp, "# Tempo PC: %.15g\n", endCond);
     // ----------------------------------------------------------
+    free(D);
+    free(L);
+    free(U);
+    free(I);
     free(xant);
     free(y);
     free(r);
