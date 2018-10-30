@@ -55,16 +55,23 @@ inline double normaMax(double *X, double *Y, int n) {
  * n: ordem da matriz
  **/
 inline double normaEuc(double *A, double *b, double *x, int n) {
-    double max = 0.0;
+    double *r = malloc(sizeof(double)*n);
+    double *Ax = malloc(sizeof(double)*n);
     for (int i = 0; i < n; i++) {
-        double r = 0.0;
         for (int j = 0; j < n; j++) {
-            r += b[j] - (A[i*n+j] * x[j]); // r = b - A*x
+            Ax[i] = A[i*n+j] * x[j];
         }
-        if (r > max)
-            max = r;
     }
-    return max;
+    for (int i = 0; i < n; i++) {
+        r[i] = b[i] - Ax[i]; // r = b - A*x
+    }
+    double res = 0.0;
+    for (int i = 0; i < n; i++) {
+        res += r[i] * r[i];
+    }
+    free(r);
+    free(Ax);
+    return sqrt(res);
 }
 
 /**
@@ -125,7 +132,9 @@ int conjGradient(double *A, double p, double *b, double *x,
     double *ATA = malloc(sizeof(double)*n*n);
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            ATA[i*n+j] = A[i*n+j] * AT[i*n+j];
+            for (int k = 0; k < n; k++) {
+                ATA[i*n+j] += A[i*n+k] * AT[k*n+j];
+            }
         }
     }
     double *ATb = malloc(sizeof(double)*n);
@@ -141,8 +150,7 @@ int conjGradient(double *A, double p, double *b, double *x,
             if (i==j) {
                 D[i*n+j] = ATA[i*n+j];
                 I[i*n+j] = 1.0;
-            }
-            if (j>i) {
+            } else if (j>i) {
                 U[i*n+j] = ATA[i*n+j];
             } else if (j<i) {
                 L[i*n+j] = ATA[i*n+j];
@@ -175,11 +183,17 @@ int conjGradient(double *A, double p, double *b, double *x,
     // Transformando matriz com condicionadora
     // Ax = b → M^−1Ax = M^−1b
     printf("Transformando sistema com condicionadora...\n");
+    double *ATAaux = malloc(sizeof(double)*n*n);
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            ATA[i*n+j] = M[i*n+j] * ATA[i*n+j];
+            for (int k = 0; k < n; k++) {
+                ATAaux[i*n+j] += M[i*n+k] * ATA[k*n+j];
+            }
         }
     }
+    free(ATA);
+    ATA = ATAaux;
+
     double *bAux = malloc(sizeof(double)*n);
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
