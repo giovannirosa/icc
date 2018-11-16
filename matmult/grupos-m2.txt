@@ -1,0 +1,19 @@
+ Group name	Description
+--------------------------------------------------------------------------------
+     BRANCH	Branch prediction miss rate/ratio
+      CACHE	Data cache miss rate/ratio
+        CPI	Cycles per instruction
+       DATA	Load to store ratio
+   FLOPS_DP	Double Precision MFLOP/s
+   FLOPS_SP	Single Precision MFLOP/s
+FPU_EXCEPTION	Floating point exceptions
+     ICACHE	Instruction cache miss rate/ratio
+    L2CACHE	L2 cache miss rate/ratio
+         L2	L2 cache bandwidth in MBytes/s
+    L3CACHE	L3 cache miss rate/ratio
+         L3	L3 cache bandwidth in MBytes/s
+      LINKS	Bandwidth on the Hypertransport links
+        MEM	Main memory bandwidth in MBytes/s
+   NUMA_0_3	Read/Write Events between the ccNUMA nodes
+   NUMA_4_7	Read/Write Events between the ccNUMA nodes
+       NUMA	Read/Write Events between the ccNUMA nodes

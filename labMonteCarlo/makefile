@@ -2,14 +2,12 @@
     CFLAGS =-Wall -g
     LFLAGS =-lm
 
-      PROG = cgSolver
-      OBJS = utils.o \
-             conjGradient.o \
-             $(PROG).o
+      PROG = monteCarlo
+      OBJS = $(PROG).o
 
 .PHONY: limpa faxina clean distclean purge all
 
-%.o: %.c %.h utils.h
+%.o: %.c %.h
 	$(CC) -c $(CFLAGS) $<
 
 $(PROG):  $(OBJS)

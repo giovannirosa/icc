@@ -1,0 +1,12 @@
+#!/bin/bash
+
+LIKWID_CMD="likwid-perfctr -C $1 -g $2 -m"
+shift 2
+
+${LIKWID_CMD} $*
+
+# Para obter lista de grupos de indicadores de performance:
+#      likwid-perfctr -a
+
+# Para obter topologia dos processadores
+#      likwid-topology -c -g

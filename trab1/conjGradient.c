@@ -57,16 +57,16 @@ inline double normaMax(double *X, double *Y, int n) {
 inline double normaEuc(double *A, double *b, double *x, int n) {
     double *r = malloc(sizeof(double)*n);
     double *Ax = malloc(sizeof(double)*n);
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
             Ax[i] = A[i*n+j] * x[j];
         }
     }
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; ++i) {
         r[i] = b[i] - Ax[i]; // r = b - A*x
     }
     double res = 0.0;
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; ++i) {
         res += r[i] * r[i];
     }
     free(r);
@@ -145,6 +145,7 @@ int conjGradient(double *A, double p, double *b, double *x,
     }
     // ----------------------------------------------------------
     printf("Coletando D, L, U...\n");
+    double startCond = timestamp();
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             if (i==j) {
@@ -160,7 +161,6 @@ int conjGradient(double *A, double p, double *b, double *x,
     // ----------------------------------------------------------
     printf("Calculando pré-condicionadora...\n");
     double *M;
-    double startCond = timestamp();
     if (p == 0.0) M = I;
     else if (p > 0.0 && p < 1.0) M = D;
     else if (p >= 1.0) {
