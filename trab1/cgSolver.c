@@ -98,9 +98,10 @@ int main(int argc, char *argv[]) {
     fprintf(fp, "#\n");
     
     // Contabilizando diagonais a serem alocadas
+    int km = (k+1)/2;
     int size = n;
-    for (int i = 3; i <= k; i += 2) {
-        size += 2 * (n - (i - 2));
+    for (int i = 1; i < km; ++i) {
+        size += 2 * (n - i);
     }
     printf("Tamanho alocado = %d\n", size);
     // Gerando matriz de coeficientes A
@@ -109,7 +110,6 @@ int main(int argc, char *argv[]) {
     A->nodes = malloc(sizeof(node)*size);
     A->size = size;
     A->diag = k;
-    int km = (k+1)/2;
     int index = 0;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
@@ -119,6 +119,7 @@ int main(int argc, char *argv[]) {
                 no->line = i;
                 no->col = j;
                 A->nodes[index++] = no;
+                // printf("Alocando %lf na posição (%d,%d)\n", no->val,i,j);
             }
         }
     }

@@ -274,43 +274,43 @@ int conjGradient(matrix *A, double p, double *b, double *x,
     // Transformando matriz com condicionadora
     // Ax = b → M^−1Ax = M^−1b
     printf("Transformando sistema com condicionadora...\n");
-    matrix *ATAaux = malloc(sizeof(matrix));
-    ATAaux->nodes = malloc(sizeof(node)*ATA->size);
-    ATAaux->size = ATA->size;
-    ATAaux->diag = ATA->diag;
-    index = 0;
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            if (i==j || (j>i && j<i+km) || (i>j && i<j+km)) {
-                node *no = malloc(sizeof(node));
-                no->line = i;
-                no->col = j;
-                no->val = 0.0;
-                // printf("********(%d,%d)\n",i,j);
-                for (int l = 0; l < n; l++) {
-                    if (i==l && (j==l ||
-                    (l>j && l<j+km) || (j>l && j<l+km))) {
-                        double val1 = findVal(M,i,l);
-                        double val2 = findVal(ATA,l,j);
-                        // printf("val = %lf + %lf(%d,%d) * %lf(%d,%d)\n", no->val,val1,i,l,val2,l,j);
-                        no->val += val1 * val2;
-                    }
-                }
-                // printf("********\n");
-                ATAaux->nodes[index++] = no;
-            }
-        }
-    }
-    free(ATA);
-    ATA = ATAaux;
+    // matrix *ATAaux = malloc(sizeof(matrix));
+    // ATAaux->nodes = malloc(sizeof(node)*ATA->size);
+    // ATAaux->size = ATA->size;
+    // ATAaux->diag = ATA->diag;
+    // index = 0;
+    // for (int i = 0; i < n; i++) {
+    //     for (int j = 0; j < n; j++) {
+    //         if (i==j || (j>i && j<i+km) || (i>j && i<j+km)) {
+    //             node *no = malloc(sizeof(node));
+    //             no->line = i;
+    //             no->col = j;
+    //             no->val = 0.0;
+    //             // printf("********(%d,%d)\n",i,j);
+    //             for (int l = 0; l < n; l++) {
+    //                 if (i==l && (j==l ||
+    //                 (l>j && l<j+km) || (j>l && j<l+km))) {
+    //                     double val1 = findVal(M,i,l);
+    //                     double val2 = findVal(ATA,l,j);
+    //                     // printf("val = %lf + %lf(%d,%d) * %lf(%d,%d)\n", no->val,val1,i,l,val2,l,j);
+    //                     no->val += val1 * val2;
+    //                 }
+    //             }
+    //             // printf("********\n");
+    //             ATAaux->nodes[index++] = no;
+    //         }
+    //     }
+    // }
+    // free(ATA);
+    // ATA = ATAaux;
     // printMatrixDiagonal(ATA,n);
 
-    double *bAux = malloc(sizeof(double)*n);
-    for (int i = 0; i < n; i++) {
-        bAux[i] = M->nodes[i]->val * ATb[i];
-    }
-    free(ATb);
-    ATb = bAux;
+    // double *bAux = malloc(sizeof(double)*n);
+    // for (int i = 0; i < n; i++) {
+    //     bAux[i] = M->nodes[i]->val * ATb[i];
+    // }
+    // free(ATb);
+    // ATb = bAux;
     // printArray(ATb,n);
     // ----------------------------------------------------------
     printf("Inicializando variáveis...\n");
@@ -356,13 +356,13 @@ int conjGradient(matrix *A, double p, double *b, double *x,
         // x^k+1 = x^k + sv
         for (int i = 0; i < n; i++) {
             xant[i] = x[i];
-            x[i] = x[i] + (v[i] * s);
+            x[i] += (v[i] * s);
         }
         fprintf(fp, "# iter %d: %.15g\n", k+1, normaMax(x,xant,n));
         // ----------------------------------------------------------
         // r = r - sz
         for (int i = 0; i < n; i++) {
-            r[i] = r[i] - (z[i] * s);
+            r[i] -= (z[i] * s);
         }
         // ----------------------------------------------------------
         // y = M^-1r
