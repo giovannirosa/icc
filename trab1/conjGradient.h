@@ -1,6 +1,22 @@
 #ifndef __CONJGRADIENT_H__
 #define __CONJGRADIENT_H__
 
+typedef struct node node;
+
+struct node {
+    double val;
+    int line;
+    int col;
+};
+
+typedef struct matrix matrix;
+
+struct matrix {
+    node **nodes;
+    int size;
+    int diag;
+};
+
 /**
  * Auxiliar para imprimir vetores
  * a: vetor
@@ -16,6 +32,14 @@ void printArray(double *a, int n);
 void printMatrix(double *a, int n);
 
 /**
+ * Auxiliar para imprimir matrizes
+ * a: matriz
+ * n: ordem da matriz
+ * k: numero de diagonais
+ **/
+void printMatrixDiagonal(matrix *a, int n);
+
+/**
  * Função que retorna a norma máxima entre a diferença de dois vetores
  * X,Y: vetores
  * n: tamanho dos vetores
@@ -29,21 +53,23 @@ double normaMax(double *X, double *Y, int n);
  * x: vetor de incógnitas
  * n: ordem da matriz
  */
-double normaEuc(double *A, double *b, double *x, int n);
+double normaEuc(matrix *A, double *b, double *x, int n);
 
 /**
  * Função que inverte uma matriz
  * M: matriz a ser invertida
  * n: ordem da matriz
  **/
-double* inverseMatrix(double *M, int n);
+void inverseMatrix(matrix *M, int n);
 
 /**
  * Função que retorna a matrix transposta
  * lines: numero de linhas
  * cols: numero de colunas
  **/
-double* transposeMatrix(double *A, int lines, int cols);
+double* transposeMatrix(double *A, int n);
+
+double findVal(matrix *A, int line, int col);
 
 /**
  * Função que resolve Ax = b utilizando método de gradientes conjugados.
@@ -57,6 +83,7 @@ double* transposeMatrix(double *A, int lines, int cols);
  * Referências:
  * M. Cristina C. Cunha, Métodos Numéricos, 2ª Edição, Editora Unicamp, 2000.
  */
-int conjGradient(double *A, double p, double *b, double *x, int n, double max, double erro, FILE *fp);
+int conjGradient(matrix *A, double p, double *b, double *x, int n, 
+                    double max, double erro, FILE *fp);
 
 #endif // __CONJGRADIENT_H__

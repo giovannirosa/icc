@@ -52,10 +52,10 @@ int main(int argc, char *argv[]) {
         }
         if (strcmp(argv[cont],"-n") == 0) {
             n = (int) strtol(argv[++cont], (char **)NULL, 10);
-            if (n <= 10) {
-                fprintf(stderr, "ERRO: Parâmetro n deve ser maior que 10!\n");
-                return 1;
-            }
+            // if (n <= 10) {
+            //     fprintf(stderr, "ERRO: Parâmetro n deve ser maior que 10!\n");
+            //     return 1;
+            // }
         }
         if (strcmp(argv[cont],"-k") == 0) {
             k = (int) strtol(argv[++cont], (char **)NULL, 10);
@@ -96,26 +96,34 @@ int main(int argc, char *argv[]) {
     fp = fopen(out,"w");
     fprintf(fp, "# grs14 Giovanni Rosa\n");
     fprintf(fp, "#\n");
-
+    
+    // Contabilizando diagonais a serem alocadas
+    int size = n;
+    for (int i = 3; i <= k; i += 2) {
+        size += 2 * (n - (i - 2));
+    }
+    printf("Tamanho alocado = %d\n", size);
     // Gerando matriz de coeficientes A
     printf("Gerando matriz de coeficientes A...\n");
-    double *A = malloc(sizeof(double)*n*n);
+    matrix *A = malloc(sizeof(matrix));
+    A->nodes = malloc(sizeof(node)*size);
+    A->size = size;
+    A->diag = k;
     int km = (k+1)/2;
+    int index = 0;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             if (i==j || (j>i && j<i+km) || (i>j && i<j+km)) {
-                A[i*n+j] = generateRandomA(i,j,k);
+                node *no = malloc(sizeof(node));
+                no->val = generateRandomA(i,j,k);
+                no->line = i;
+                no->col = j;
+                A->nodes[index++] = no;
             }
         }
     }
     // printf("Matriz A:\n");
-    // printMatrix(A,n);
-    // printf("Matriz D:\n");
-    // printMatrix(D,n);
-    // printf("Matriz L:\n");
-    // printMatrix(L,n);
-    // printf("Matriz U:\n");
-    // printMatrix(U,n);
+    // printMatrixDiagonal(A,n);
     printf("---------------------------------\n");
 
     // Gerando vetor de termos independentes B
@@ -124,7 +132,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < n; i++) {
         b[i] = generateRandomB(k);
     }
-
+    // printArray(b,n);
     printf("\n---------------------------------\n");
     double *x = malloc(sizeof(double)*n);
     printf("Rodando método de gradientes conjugados...\n");
