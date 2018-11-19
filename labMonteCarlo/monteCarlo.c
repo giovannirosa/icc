@@ -1,6 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
+
+const int P = 1e7;
+
+double monteCarlo(int n, int a, int b, int p);
 
 int main (int argc, char *argv[]) {
     int n,a,b;
@@ -39,11 +44,9 @@ int main (int argc, char *argv[]) {
         
 
     }
-
-
-
-
     srand(1234);
+    double mc = monteCarlo(n,a,b,P);
+    printf("Monte Carlo = %lf\n",mc);
 }
 
 double styblinskiTang(double *x, int n) {
@@ -55,8 +58,29 @@ double styblinskiTang(double *x, int n) {
     return soma / 2;
 }
 
-void trapezios(double *x, int p, int n) {
-    for (int i = 0; i < n; i++) {
-        
+void trapezios(int n, int a, int b, int p) {
+    double h = (a-b)/(double)n;
+    double *x = malloc(sizeof(double)*n);
+
+    for (int i = 0; i < p; i++) {
+        for (int i = 0; i < p; i++) {
+
+            // styblinskiTang(x[0*n+i],x[1*n+j],n);
+        }
     }
+}
+
+double monteCarlo(int n, int a, int b, int p) {
+    double h = (a-b)/(double)n;
+    double *x = malloc(sizeof(double)*n);
+    double sum = 0;
+
+    for (int k = 0; k < p; ++k) {
+        for (int i = 0; i < n; ++i) {
+            x[i] = a + ((double)rand() / RAND_MAX) * (b - a);
+        }
+        sum += styblinskiTang(x,n);
+    }
+
+    return (sum/p)*(b-a);
 }

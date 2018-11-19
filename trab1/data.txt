@@ -1,0 +1,68 @@
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Core(TM) i5-7500 CPU @ 3.40GHz
+CPU type:	Intel Kabylake processor
+CPU clock:	3.41 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region op1, Group 1: BRANCH
++-------------------+----------+
+|    Region Info    |  Core 0  |
++-------------------+----------+
+| RDTSC Runtime [s] | 0.000733 |
+|     call count    |        1 |
++-------------------+----------+
+
++------------------------------+---------+---------+
+|             Event            | Counter |  Core 0 |
++------------------------------+---------+---------+
+|       INSTR_RETIRED_ANY      |  FIXC0  | 1545114 |
+|     CPU_CLK_UNHALTED_CORE    |  FIXC1  |  527209 |
+|     CPU_CLK_UNHALTED_REF     |  FIXC2  | 2000922 |
+| BR_INST_RETIRED_ALL_BRANCHES |   PMC0  |  517360 |
+| BR_MISP_RETIRED_ALL_BRANCHES |   PMC1  |    7321 |
++------------------------------+---------+---------+
+
++----------------------------+----------+
+|           Metric           |  Core 0  |
++----------------------------+----------+
+|     Runtime (RDTSC) [s]    |   0.0007 |
+|    Runtime unhalted [s]    |   0.0002 |
+|         Clock [MHz]        | 897.7385 |
+|             CPI            |   0.3412 |
+|         Branch rate        |   0.3348 |
+|  Branch misprediction rate |   0.0047 |
+| Branch misprediction ratio |   0.0142 |
+|   Instructions per branch  |   2.9865 |
++----------------------------+----------+
+
+Region op2, Group 1: BRANCH
++-------------------+----------+
+|    Region Info    |  Core 0  |
++-------------------+----------+
+| RDTSC Runtime [s] | 0.000348 |
+|     call count    |        1 |
++-------------------+----------+
+
++------------------------------+---------+---------+
+|             Event            | Counter |  Core 0 |
++------------------------------+---------+---------+
+|       INSTR_RETIRED_ANY      |  FIXC0  | 1199193 |
+|     CPU_CLK_UNHALTED_CORE    |  FIXC1  |  321945 |
+|     CPU_CLK_UNHALTED_REF     |  FIXC2  | 1221484 |
+| BR_INST_RETIRED_ALL_BRANCHES |   PMC0  |  400537 |
+| BR_MISP_RETIRED_ALL_BRANCHES |   PMC1  |    3463 |
++------------------------------+---------+---------+
+
++----------------------------+----------+
+|           Metric           |  Core 0  |
++----------------------------+----------+
+|     Runtime (RDTSC) [s]    |   0.0003 |
+|    Runtime unhalted [s]    |   0.0001 |
+|         Clock [MHz]        | 898.0305 |
+|             CPI            |   0.2685 |
+|         Branch rate        |   0.3340 |
+|  Branch misprediction rate |   0.0029 |
+| Branch misprediction ratio |   0.0086 |
+|   Instructions per branch  |   2.9940 |
++----------------------------+----------+
+

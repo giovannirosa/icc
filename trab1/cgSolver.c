@@ -1,5 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "utils.h"
@@ -33,7 +31,7 @@ int main(int argc, char *argv[]) {
     double p = -1.0, e = 0.001;
     char *out = NULL;
     FILE *fp;
-    printf("Lendo parâmetros...\n");
+    if (DEBUGMSG) printf("Lendo parâmetros...\n");
     for(int cont=1; cont < argc; cont++) {
         if (strcmp(argv[cont],"-h") == 0) {
             printf("O programa deve ser executado com os seguintes parâmetros:\n");
@@ -52,10 +50,10 @@ int main(int argc, char *argv[]) {
         }
         if (strcmp(argv[cont],"-n") == 0) {
             n = (int) strtol(argv[++cont], (char **)NULL, 10);
-            // if (n <= 10) {
-            //     fprintf(stderr, "ERRO: Parâmetro n deve ser maior que 10!\n");
-            //     return 1;
-            // }
+            if (n <= 10) {
+                fprintf(stderr, "ERRO: Parâmetro n deve ser maior que 10!\n");
+                return 1;
+            }
         }
         if (strcmp(argv[cont],"-k") == 0) {
             k = (int) strtol(argv[++cont], (char **)NULL, 10);
@@ -86,13 +84,20 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    printf("n = %d\n", n);
-    printf("k = %d\n", k);
-    printf("p = %lf\n", p);
-    printf("i = %d\n", max_it);
-    printf("e = %lf\n", e);
-    printf("o = %s\n", out);
-    printf("---------------------------------\n");
+    LIKWID_MARKER_INIT;
+    LIKWID_MARKER_THREADINIT;
+    LIKWID_MARKER_REGISTER("op1");
+    LIKWID_MARKER_REGISTER("op2");
+
+    if (DEBUGMSG) {
+        printf("n = %d\n", n);
+        printf("k = %d\n", k);
+        printf("p = %lf\n", p);
+        printf("i = %d\n", max_it);
+        printf("e = %lf\n", e);
+        printf("o = %s\n", out);
+        printf("---------------------------------\n");
+    }
     fp = fopen(out,"w");
     fprintf(fp, "# grs14 Giovanni Rosa\n");
     fprintf(fp, "#\n");
@@ -103,9 +108,9 @@ int main(int argc, char *argv[]) {
     for (int i = 1; i < km; ++i) {
         size += 2 * (n - i);
     }
-    printf("Tamanho alocado = %d\n", size);
+    if (DEBUGMSG) printf("Tamanho alocado = %d\n", size);
     // Gerando matriz de coeficientes A
-    printf("Gerando matriz de coeficientes A...\n");
+    if (DEBUGMSG) printf("Gerando matriz de coeficientes A...\n");
     matrix *A = malloc(sizeof(matrix));
     A->nodes = malloc(sizeof(node)*size);
     A->size = size;
@@ -125,45 +130,47 @@ int main(int argc, char *argv[]) {
     }
     // printf("Matriz A:\n");
     // printMatrixDiagonal(A,n);
-    printf("---------------------------------\n");
+    if (DEBUGMSG) printf("---------------------------------\n");
 
     // Gerando vetor de termos independentes B
-    printf("Gerando vetor de termos independentes B...\n");
+    if (DEBUGMSG) printf("Gerando vetor de termos independentes B...\n");
     double *b = malloc(sizeof(double)*n);
     for (int i = 0; i < n; i++) {
         b[i] = generateRandomB(k);
     }
     // printArray(b,n);
-    printf("\n---------------------------------\n");
+    if (DEBUGMSG) printf("---------------------------------\n");
     double *x = malloc(sizeof(double)*n);
-    printf("Rodando método de gradientes conjugados...\n");
+    if (DEBUGMSG) printf("Rodando método de gradientes conjugados...\n");
     int it = conjGradient(A,p,b,x,n,max_it,e,fp);
-    printf("---------------------------------\n");
+    if (DEBUGMSG) printf("---------------------------------\n");
     if (it >= max_it) {
-        fprintf(stderr, "O método extrapolou o limite de %d iterações!\n", max_it);
-        free(A);
+        if (DEBUGMSG) fprintf(stderr, "O método extrapolou o limite de %d iterações!\n", max_it);
+        freeMatrix(A);
         free(b);
         free(x);
-        return 1;
+        LIKWID_MARKER_CLOSE;
+        return 0;
     } else if (it == -1) {
-        free(A);
+        freeMatrix(A);
         free(b);
         free(x);
+        LIKWID_MARKER_CLOSE;
         return 1;
     } else {
-        printf("Método convergiu com sucesso em %d iterações!\n", it+1);
+        if (DEBUGMSG) printf("Método convergiu com sucesso em %d iterações!\n", it+1);
     }
-    printf("Valores de x:\n");
+    if (DEBUGMSG) printf("Valores de x:\n");
     fprintf(fp, "#\n");
     fprintf(fp, "%d\n", n);
     for (int i = 0; i < n; i++) {
-        printf("%lf ", x[i]);
+        if (DEBUGMSG) printf("%lf ", x[i]);
         fprintf(fp, "%.15g ", x[i]);
     }
-    printf("\n");
-    free(A);
+    if (DEBUGMSG) printf("\n");
+    freeMatrix(A);
     free(b);
     free(x);
-
+    LIKWID_MARKER_CLOSE;
     return 0;
 }

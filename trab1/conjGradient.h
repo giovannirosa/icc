@@ -1,6 +1,13 @@
 #ifndef __CONJGRADIENT_H__
 #define __CONJGRADIENT_H__
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <likwid.h>
+
+static const int DEBUGMSG = 0;
+
 typedef struct node node;
 
 struct node {
@@ -69,7 +76,19 @@ void inverseMatrix(matrix *M, int n);
  **/
 double* transposeMatrix(double *A, int n);
 
+/**
+ * Encontra valor na matriz para posição (line,col)
+ * A: matriz para busca
+ * line: linha da posição
+ * col: coluna da posição
+ **/
 double findVal(matrix *A, int line, int col);
+
+/**
+ * Libera matriz da memória
+ * A: matriz a ser liberada
+ **/
+void freeMatrix(matrix *A);
 
 /**
  * Função que resolve Ax = b utilizando método de gradientes conjugados.

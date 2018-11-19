@@ -1,7 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-
 #include "conjGradient.h"
 #include "utils.h"
 
@@ -109,56 +105,12 @@ inline void inverseMatrix(matrix *M, int n) {
 }
 
 /**
- * Função que retorna a matrix transposta
- * lines: numero de linhas
- * cols: numero de colunas
+ * Encontra valor na matriz para posição (line,col)
+ * A: matriz para busca
+ * line: linha da posição
+ * col: coluna da posição
  **/
-inline double* transposeMatrix(double *A, int n) {
-    double *T = malloc(sizeof(double)*n*n);
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            int index = (i * n) + j;
-            int indexT = (j * n) + i;
-            T[indexT] = A[index];
-        }
-    }
-    return T;
-}
-
-/**
- * Função que retorna a matrix transposta
- * lines: numero de linhas
- * cols: numero de colunas
- **/
-// inline double* transposeMatrixDiagonal(matrix *A, int n) {
-//     // double *Aaux = malloc(sizeof(double)*n*n);
-//     // int km = (k+1)/2;
-//     // int index = 0;
-//     // for (int i = 0; i < n; i++) {
-//     //     for (int j = 0; j < n; j++) {
-//     //         if (i==j || (j>i && j<i+km) || (i>j && i<j+km)) {
-//     //             Aaux[i*n+j] = A[index++];
-//     //         } else {
-//     //             Aaux[i*n+j] = 0.0;
-//     //         }
-//     //     }
-//     // }
-//     // double *Taux = transposeMatrix(Aaux,n);
-//     // free(Aaux);
-//     // index = 0;
-//     double *T = malloc(sizeof(double)*);
-//     // for (int i = 0; i < n; i++) {
-//     //     for (int j = 0; j < n; j++) {
-//     //         if (i==j || (j>i && j<i+km) || (i>j && i<j+km)) {
-//     //             T[index++] = Taux[i*n+j];
-//     //         }
-//     //     }
-//     // }
-//     // free(Taux);
-//     return T;
-// }
-
-double findVal(matrix *A, int line, int col) {
+inline double findVal(matrix *A, int line, int col) {
     for (int i = 0; i < A->size; ++i) {
         node *n = A->nodes[i];
         if (n->line == line && n->col == col) {
@@ -169,9 +121,21 @@ double findVal(matrix *A, int line, int col) {
 }
 
 /**
+ * Libera matriz da memória
+ * A: matriz a ser liberada
+ **/
+inline void freeMatrix(matrix *A) {
+    for (int i = 0; i < A->size; ++i) {
+        free(A->nodes[i]);
+    }
+    free(A->nodes);
+    free(A);
+}
+
+/**
  * Função que resolve Ax = b utilizando método de gradientes conjugados.
  * A: matriz de coeficientes
- * p: peso
+ * p: peso, decide matriz condicionadora
  * b: vetor de termos independentes
  * x: vetor de incógnitas
  * n: ordem da matriz
@@ -184,8 +148,7 @@ int conjGradient(matrix *A, double p, double *b, double *x,
                      int n, double max, double erro, FILE *fp) {
     // ----------------------------------------------------------
     // Transformando matriz em simetrica
-    printf("Transformando matriz em simetrica...\n");
-    // double *AT = transposeMatrixDiagonal(A,n);
+    if (DEBUGMSG) printf("Transformando matriz em simetrica...\n");
     matrix *ATA = malloc(sizeof(matrix));
     ATA->nodes = malloc(sizeof(node)*A->size);
     ATA->size = A->size;
@@ -231,7 +194,7 @@ int conjGradient(matrix *A, double p, double *b, double *x,
     }
     // printArray(ATb,n);
     // ----------------------------------------------------------
-    printf("Calculando pré-condicionadora...\n");
+    if (DEBUGMSG) printf("Calculando pré-condicionadora...\n");
     double startCond = timestamp();
     matrix *M = malloc(sizeof(matrix));
     M->nodes = malloc(sizeof(node)*n);
@@ -267,53 +230,11 @@ int conjGradient(matrix *A, double p, double *b, double *x,
     // printf("Matriz M:\n");
     // printMatrixDiagonal(M,n);
     // ----------------------------------------------------------
-    printf("Invertendo matriz condicionadora...\n");
+    if (DEBUGMSG) printf("Invertendo matriz condicionadora...\n");
     inverseMatrix(M,n); // invertendo M
     // printMatrixDiagonal(M,n);
     // ----------------------------------------------------------
-    // Transformando matriz com condicionadora
-    // Ax = b → M^−1Ax = M^−1b
-    printf("Transformando sistema com condicionadora...\n");
-    // matrix *ATAaux = malloc(sizeof(matrix));
-    // ATAaux->nodes = malloc(sizeof(node)*ATA->size);
-    // ATAaux->size = ATA->size;
-    // ATAaux->diag = ATA->diag;
-    // index = 0;
-    // for (int i = 0; i < n; i++) {
-    //     for (int j = 0; j < n; j++) {
-    //         if (i==j || (j>i && j<i+km) || (i>j && i<j+km)) {
-    //             node *no = malloc(sizeof(node));
-    //             no->line = i;
-    //             no->col = j;
-    //             no->val = 0.0;
-    //             // printf("********(%d,%d)\n",i,j);
-    //             for (int l = 0; l < n; l++) {
-    //                 if (i==l && (j==l ||
-    //                 (l>j && l<j+km) || (j>l && j<l+km))) {
-    //                     double val1 = findVal(M,i,l);
-    //                     double val2 = findVal(ATA,l,j);
-    //                     // printf("val = %lf + %lf(%d,%d) * %lf(%d,%d)\n", no->val,val1,i,l,val2,l,j);
-    //                     no->val += val1 * val2;
-    //                 }
-    //             }
-    //             // printf("********\n");
-    //             ATAaux->nodes[index++] = no;
-    //         }
-    //     }
-    // }
-    // free(ATA);
-    // ATA = ATAaux;
-    // printMatrixDiagonal(ATA,n);
-
-    // double *bAux = malloc(sizeof(double)*n);
-    // for (int i = 0; i < n; i++) {
-    //     bAux[i] = M->nodes[i]->val * ATb[i];
-    // }
-    // free(ATb);
-    // ATb = bAux;
-    // printArray(ATb,n);
-    // ----------------------------------------------------------
-    printf("Inicializando variáveis...\n");
+    if (DEBUGMSG) printf("Inicializando variáveis...\n");
     double *r = malloc(sizeof(double)*n);
     double *v = malloc(sizeof(double)*n);
     double *z = malloc(sizeof(double)*n);
@@ -330,7 +251,8 @@ int conjGradient(matrix *A, double p, double *b, double *x,
     // printArray(v,n);
     // printArray(y,n);
     // ----------------------------------------------------------
-    printf("Iniciando cálculo...\n");
+    if (DEBUGMSG) printf("Iniciando cálculo...\n");
+    LIKWID_MARKER_START("op1");
     int k;
     double meanTime = 0.0;
     for (k = 0; k < max; k++) {
@@ -376,7 +298,7 @@ int conjGradient(matrix *A, double p, double *b, double *x,
             rTr += r[i] * r[i];
         }
         if (isinf(rTr) || isnan(rTr)) {
-            fprintf(stderr, "ERRO: Vetor r chegou a inf ou nan!\n");
+            if (DEBUGMSG) fprintf(stderr, "ERRO: Vetor r chegou a inf ou nan!\n");
             k = -1;
             break;
         }
@@ -396,16 +318,19 @@ int conjGradient(matrix *A, double p, double *b, double *x,
         // ----------------------------------------------------------
         double endTime = timestamp() - startTime;
         meanTime += endTime;
-        printf("residuo = %lf\n", rTr);
+        if (DEBUGMSG) printf("residuo = %lf\n", rTr);
         if (rTr < erro) {
             break;
         }
     }
+    LIKWID_MARKER_STOP("op1");
     // printf("meanTime = %lf, k = %d\n", meanTime, k);
     meanTime /= k+1;
     // ----------------------------------------------------------
     double startTime = timestamp();
+    LIKWID_MARKER_START("op2");
     double residuo = normaEuc(A,b,x,n);
+    LIKWID_MARKER_STOP("op2");
     double endTime = timestamp() - startTime;
     // ----------------------------------------------------------
     fprintf(fp, "# residuo: %.15g\n", residuo);
@@ -413,7 +338,7 @@ int conjGradient(matrix *A, double p, double *b, double *x,
     fprintf(fp, "# Tempo residuo: %.15g\n", endTime);
     fprintf(fp, "# Tempo PC: %.15g\n", endCond);
     // ----------------------------------------------------------
-    free(M);
+    freeMatrix(M);
     free(xant);
     free(y);
     free(r);
