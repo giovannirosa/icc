@@ -61,9 +61,13 @@ Onde:
 - Tempo iter: Tempo médio para calcular cada iteração do método, inclusive o cálculo do erro.
 - Tempo residuo: Tempo para calcular a norma do resíduo ao final do processo.
 
+### Script de Testes
+
+Nesse diretório se encontra um script tests.sh que contém 4 tipos de testes (Tempo, Banda de Memória, Cache Miss, Operações Aritméticas) para diferentes tamanhos (32,64,128,256,512,1000,2000) de ordem do sistema linear, com k = 7 diagonais, para i = 10 iterações.
+
 ### Limitações encontradas no projeto [BUGS]
 
-Pré-condicionadores fazem o sistema linear convergir em 1 iteração.
+Sistemas Lineares de ordem acima de 4000 demoram um tempo significativo para serem solucionados.
 
 ## Autor
 
