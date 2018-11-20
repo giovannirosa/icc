@@ -1,6 +1,6 @@
-# Introdução a Computação Científica Trabalho 1
+# Introdução a Computação Científica Trabalho 2
 
-Trabalho 1 da matéria de Introdução a Computação Científica do segundo semestre de 2018, Universidade Federal do Paraná - UFPR.
+Trabalho 2 da matéria de Introdução a Computação Científica do segundo semestre de 2018, Universidade Federal do Paraná - UFPR.
 
 ## Início
 
