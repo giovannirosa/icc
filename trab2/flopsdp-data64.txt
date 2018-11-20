@@ -8,63 +8,63 @@ Region op1, Group 1: FLOPS_DP
 +-------------------+----------+
 |    Region Info    |  Core 0  |
 +-------------------+----------+
-| RDTSC Runtime [s] | 0.000178 |
+| RDTSC Runtime [s] | 0.000642 |
 |     call count    |        1 |
 +-------------------+----------+
 
 +------------------------------------------+---------+---------+
 |                   Event                  | Counter |  Core 0 |
 +------------------------------------------+---------+---------+
-|             INSTR_RETIRED_ANY            |  FIXC0  | 1545104 |
-|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  514566 |
-|           CPU_CLK_UNHALTED_REF           |  FIXC2  |  627640 |
+|             INSTR_RETIRED_ANY            |  FIXC0  | 6034153 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  | 1533890 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  | 2168766 |
 | FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |       0 |
-|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |    7040 |
-| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |     530 |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   17240 |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |     300 |
 +------------------------------------------+---------+---------+
 
 +----------------------+-----------+
 |        Metric        |   Core 0  |
 +----------------------+-----------+
-|  Runtime (RDTSC) [s] |    0.0002 |
-| Runtime unhalted [s] |    0.0002 |
-|      Clock [MHz]     | 2794.0262 |
-|          CPI         |    0.3330 |
-|      DP MFLOP/s      |   51.4078 |
-|    AVX DP MFLOP/s    |   11.8979 |
-|    Packed MUOPS/s    |    2.9745 |
-|    Scalar MUOPS/s    |   39.5099 |
+|  Runtime (RDTSC) [s] |    0.0006 |
+| Runtime unhalted [s] |    0.0005 |
+|      Clock [MHz]     | 2410.3407 |
+|          CPI         |    0.2542 |
+|      DP MFLOP/s      |   28.7147 |
+|    AVX DP MFLOP/s    |    1.8686 |
+|    Packed MUOPS/s    |    0.4672 |
+|    Scalar MUOPS/s    |   26.8460 |
 +----------------------+-----------+
 
 Region op2, Group 1: FLOPS_DP
 +-------------------+----------+
 |    Region Info    |  Core 0  |
 +-------------------+----------+
-| RDTSC Runtime [s] | 0.000125 |
+| RDTSC Runtime [s] | 0.000066 |
 |     call count    |        1 |
 +-------------------+----------+
 
-+------------------------------------------+---------+---------+
-|                   Event                  | Counter |  Core 0 |
-+------------------------------------------+---------+---------+
-|             INSTR_RETIRED_ANY            |  FIXC0  | 1197053 |
-|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  323394 |
-|           CPU_CLK_UNHALTED_REF           |  FIXC2  |  441478 |
-| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |       0 |
-|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |    2155 |
-| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |       0 |
-+------------------------------------------+---------+---------+
++------------------------------------------+---------+--------+
+|                   Event                  | Counter | Core 0 |
++------------------------------------------+---------+--------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 709042 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  | 216102 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  | 237992 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |      0 |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   1074 |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |      0 |
++------------------------------------------+---------+--------+
 
 +----------------------+-----------+
 |        Metric        |   Core 0  |
 +----------------------+-----------+
 |  Runtime (RDTSC) [s] |    0.0001 |
 | Runtime unhalted [s] |    0.0001 |
-|      Clock [MHz]     | 2496.4501 |
-|          CPI         |    0.2702 |
-|      DP MFLOP/s      |   17.1724 |
+|      Clock [MHz]     | 3094.5204 |
+|          CPI         |    0.3048 |
+|      DP MFLOP/s      |   16.1931 |
 |    AVX DP MFLOP/s    |         0 |
 |    Packed MUOPS/s    |         0 |
-|    Scalar MUOPS/s    |   17.1724 |
+|    Scalar MUOPS/s    |   16.1931 |
 +----------------------+-----------+
 

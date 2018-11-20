@@ -73,16 +73,49 @@ inline double normaMax(double *X, double *Y, int n) {
  * n: ordem da matriz
  **/
 inline double normaEuc(matrix *A, double *b, double *x, int n) {
+    double *Ax = malloc(sizeof(double)*n);
     double res = 0.0;
-    for (int i = 0; i < n; ++i) {
-        double Ax = 0.0;
-        for (int j = 0; j < n; ++j) {
-            Ax += findVal(A,i,j) * x[j];
+    int rest = n % 4;
+    int km = (A->diag+1)/2;
+    int limit, j;
+    for (int i = 0; i < n-rest; i += 4) {
+        if (i < km) {
+            j = 0;
+            limit = km+i;
+        } else {
+            j = i-km+1;
+            limit = n;
         }
-        double r = b[i] - Ax; // r = b - A*x
+        Ax[i] = Ax[i+1] = Ax[i+2] = Ax[i+3] = 0.0;
+        for (; j < limit; ++j) {
+            if (i==j || (j>i && j<i+km) || (i>j && i<j+km)) {
+                Ax[i] += findVal(A,i,j) * x[j];
+                Ax[i+1] += findVal(A,i+1,j) * x[j];
+                Ax[i+2] += findVal(A,i+2,j) * x[j];
+                Ax[i+3] += findVal(A,i+3,j) * x[j];
+            }
+        }
+        double r = b[i] - Ax[i]; // r = b - A*x
+        res += r * r;
+        r = b[i+1] - Ax[i+1]; // r = b - A*x
+        res += r * r;
+        r = b[i+2] - Ax[i+2]; // r = b - A*x
+        res += r * r;
+        r = b[i+3] - Ax[i+3]; // r = b - A*x
         res += r * r;
     }
-    return sqrt(res);
+    for (int i = n-rest; i < n; ++i) {
+        Ax[i] = 0.0;
+        for (int j = 0; j < n; ++j) {
+            if (i==j || (j>i && j<i+km) || (i>j && i<j+km)) {
+                Ax[i] += findVal(A,i,j) * x[j];
+            }
+        }
+        double r = b[i] - Ax[i]; // r = b - A*x
+        res += r * r;
+    }
+    free(Ax);
+    return sqrtl(res);
 }
 
 /**
@@ -148,6 +181,7 @@ int conjGradient(matrix *A, double p, double *b, double *x,
     ATA->diag = A->diag;
     int km = (A->diag+1)/2;
     int index = 0;
+    int limit, j, rest = n % 4; // Loop Unrolling de 4 posições
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
             if (i==j || (j>i && j<i+km) || (i>j && i<j+km)) {
@@ -194,7 +228,7 @@ int conjGradient(matrix *A, double p, double *b, double *x,
     M->size = n;
     M->diag = 1;
     if (p == 0.0) { // Matriz Identidade
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; ++i) {
             node *no = malloc(sizeof(node));
             no->line = i;
             no->col = i;
@@ -248,13 +282,20 @@ int conjGradient(matrix *A, double p, double *b, double *x,
     LIKWID_MARKER_START("op1");
     int k;
     double meanTime = 0.0;
-    for (k = 0; k < max; k++) {
+    for (k = 0; k < max; ++k) {
         double startTime = timestamp();
         // ----------------------------------------------------------
         // z = Av
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; ++i) {
+            if (i < km) {
+                j = 0;
+                limit = km+i;
+            } else {
+                j = i-km+1;
+                limit = n;
+            }
             z[i] = 0.0;
-            for (int j = 0; j < n; j++) {
+            for (; j < limit; ++j) {
                 if (i==j || (j>i && j<i+km) || (i>j && i<j+km)) {
                     z[i] += findVal(ATA,i,j) * v[j];
                 }
@@ -263,49 +304,79 @@ int conjGradient(matrix *A, double p, double *b, double *x,
         // ----------------------------------------------------------
         // s = aux/ v^Tz
         double vtz = 0.0;
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; ++i) {
             vtz += v[i] * z[i];
         }
         double s = aux/vtz;
         // ----------------------------------------------------------
-        // x^k+1 = x^k + sv
-        for (int i = 0; i < n; i++) {
+        double rTr = 0.0;
+        double aux1 = 0.0;
+        for (int i = 0; i < n-rest; i += 4) {
+            // ----------------------------------------------------------
+            // x^k+1 = x^k + sv
             xant[i] = x[i];
             x[i] += (v[i] * s);
-        }
-        fprintf(fp, "# iter %d: %.15g\n", k+1, normaMax(x,xant,n));
-        // ----------------------------------------------------------
-        // r = r - sz
-        for (int i = 0; i < n; i++) {
+            xant[i+1] = x[i+1];
+            x[i+1] += (v[i+1] * s);
+            xant[i+2] = x[i+2];
+            x[i+2] += (v[i+2] * s);
+            xant[i+3] = x[i+3];
+            x[i+3] += (v[i+3] * s);
+            // ----------------------------------------------------------
+            // r = r - sz
             r[i] -= (z[i] * s);
-        }
-        // ----------------------------------------------------------
-        // y = M^-1r
-        for (int i = 0; i < n; i++) {
+            r[i+1] -= (z[i+1] * s);
+            r[i+2] -= (z[i+2] * s);
+            r[i+3] -= (z[i+3] * s);
+            // ----------------------------------------------------------
+            // y = M^-1r
             y[i] = M->nodes[i]->val * r[i];
+            y[i+1] = M->nodes[i+1]->val * r[i+1];
+            y[i+2] = M->nodes[i+2]->val * r[i+2];
+            y[i+3] = M->nodes[i+3]->val * r[i+3];
+            // ----------------------------------------------------------
+            // rTr = r^Tr
+            rTr += r[i] * r[i];
+            rTr += r[i+1] * r[i+1];
+            rTr += r[i+2] * r[i+2];
+            rTr += r[i+3] * r[i+3];
+            // ----------------------------------------------------------
+            // aux1 = y^Tr
+            aux1 += y[i] * r[i];
+            aux1 += y[i+1] * r[i+1];
+            aux1 += y[i+2] * r[i+2];
+            aux1 += y[i+3] * r[i+3];
+        }
+        for (int i = n-rest; i < n; ++i) {
+            // ----------------------------------------------------------
+            // x^k+1 = x^k + sv
+            xant[i] = x[i];
+            x[i] += (v[i] * s);
+            // ----------------------------------------------------------
+            // r = r - sz
+            r[i] -= (z[i] * s);
+            // ----------------------------------------------------------
+            // y = M^-1r
+            y[i] = M->nodes[i]->val * r[i];
+            // ----------------------------------------------------------
+            // rTr = r^Tr
+            rTr += r[i] * r[i];
+            // ----------------------------------------------------------
+            // aux1 = y^Tr
+            aux1 += y[i] * r[i];
         }
         // ----------------------------------------------------------
-        // rTr = r^Tr
-        double rTr = 0.0;
-        for (int i = 0; i < n; i++) {
-            rTr += r[i] * r[i];
-        }
+        fprintf(fp, "# iter %d: %.15g\n", k+1, normaMax(x,xant,n));
         if (isinf(rTr) || isnan(rTr)) {
             if (DEBUGMSG) fprintf(stderr, "ERRO: Vetor r chegou a inf ou nan!\n");
             k = -1;
             break;
         }
-        // ----------------------------------------------------------
-        // aux1 = y^Tr
-        double aux1 = 0.0;
-        for (int i = 0; i < n; i++) {
-            aux1 += y[i] * r[i];
-        }
         double m = aux1/aux;
         aux = aux1;
         // ----------------------------------------------------------
         // v = y + mv
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; ++i) {
             v[i] = y[i] + (v[i] * m);
         }
         // ----------------------------------------------------------
